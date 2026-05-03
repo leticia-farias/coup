@@ -1,6 +1,6 @@
-package coup.personagens;
+package coup.domain.model;
 
-public enum PersonagensNomes {
+public enum Personagem {
 
 	ASSASSINO,
 	CAPITAO,

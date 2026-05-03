@@ -1,11 +1,11 @@
-package coup.acoes;
+package coup.engine.regras;
 
-import coup.jogador.Jogador;
-import coup.personagens.Personagem;
+import coup.domain.model.Jogador;
+import coup.domain.model.Personagem;
 
-public class Contestacao {
+public class ResolucaoContestacao {
 
-	public boolean contestar(Jogador jogadorDuvidando, Jogador jogadorContestado, Personagem personagemContestado) {
+public boolean contestar(Jogador jogadorDuvidando, Jogador jogadorContestado, Personagem personagemContestado) {
 		
 		// SE TIVER AS DUAS CARTAS AINDA
 		if (jogadorContestado.getJogadorCartas().isStatusCompleto()) {
@@ -15,12 +15,11 @@ public class Contestacao {
 		
 		Personagem personagemMostrado = jogadorContestado.escolherCartaParaMostrar();
 		
-		if (personagemContestado.getNome() == personagemMostrado.getNome()) {
+		if (personagemContestado.equals(personagemMostrado)) {
 			jogadorDuvidando.escolherCartaParaMorrer();
 		} else {
 			jogadorContestado.escolherCartaParaMorrer();
 		}
 		return true;
 	}
-
 }

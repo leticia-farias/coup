@@ -1,10 +1,9 @@
-package coup.jogador;
+package coup.domain.model;
 
 import java.util.Scanner;
 
-import coup.Carta;
 import coup.MenuOpcoes;
-import coup.personagens.Personagem;
+import coup.jogador.JogadorCartas;
 
 public class Jogador {
 
@@ -14,10 +13,10 @@ public class Jogador {
 	JogadorCartas jogadorCartas = new JogadorCartas();
 	boolean statusAtivo = true;
 	
-	Scanner sc = new Scanner(System.in);
-	int resposta;
 	Personagem p = null;
 	MenuOpcoes menu = new MenuOpcoes();
+	
+	// metodos: adicionarMoedas, removerMoedas, getCartasAtivas, isEleminado
 	
 	public Personagem escolherCartaParaMostrar() {
 
@@ -104,7 +103,6 @@ public class Jogador {
 
 	public JogadorCartas getJogadorCartas() {
 		return jogadorCartas;
-	}
 
 	public void setJogadorCartas(JogadorCartas jogadorCartas) {
 		this.jogadorCartas = jogadorCartas;
@@ -116,6 +114,16 @@ public class Jogador {
 
 	public void setStatusAtivo(boolean statusAtivo) {
 		this.statusAtivo = statusAtivo;
+	}
+
+	public void adicionarMoedas(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void adicionarCarta(Object comprarTopo) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

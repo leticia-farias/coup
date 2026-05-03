@@ -3,7 +3,7 @@ package coup.jogador;
 import java.util.ArrayList;
 import java.util.List;
 
-import coup.Carta;
+import coup.domain.model.Carta;
 
 public class JogadorCartas {
 

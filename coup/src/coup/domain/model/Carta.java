@@ -1,6 +1,4 @@
-package coup;
-
-import coup.personagens.Personagem; 
+package coup.domain.model;
 
 public class Carta {
 	

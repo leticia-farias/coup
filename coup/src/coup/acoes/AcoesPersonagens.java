@@ -1,27 +1,8 @@
 package coup.acoes;
 
-import coup.jogador.Jogador;
+import coup.domain.model.Jogador;
 
 public class AcoesPersonagens {
-
-	// duque: pegua 3 moedas do jogo
-	public void ducar(Jogador jogador) {
-		int saldoAtualizado = jogador.getSaldo() + 3;
-		jogador.setSaldo(saldoAtualizado);
-	}
-
-	// capitão: pega 2 moedas de outro jogador -> bloqueado por outro capitão ou
-	// embaixador
-	public void capitar(Jogador jogador, Jogador jogadorEscolhido) {
-		if (bloquearCapitao()) {
-
-		}
-		int saldoAtualizado = jogador.getSaldo() + 2;
-		jogador.setSaldo(saldoAtualizado);
-
-		int saldoAtualizadoJEscolhido = jogadorEscolhido.getSaldo() - 2;
-		jogadorEscolhido.setSaldo(saldoAtualizadoJEscolhido);
-	}
 
 	public boolean bloquearCapitao() {
 		return true;

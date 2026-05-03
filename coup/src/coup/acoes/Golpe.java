@@ -1,6 +1,6 @@
 package coup.acoes;
 
-import coup.jogador.Jogador;
+import coup.domain.model.Jogador;
 
 public class Golpe {
 

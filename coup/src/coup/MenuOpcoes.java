@@ -8,9 +8,9 @@ import coup.acoes.Bloqueios;
 import coup.acoes.Contestacao;
 import coup.acoes.Golpe;
 import coup.acoes.OutrasAcoes;
-import coup.jogador.Jogador;
+import coup.domain.model.Jogador;
+import coup.domain.model.Personagem;
 import coup.personagens.Duque;
-import coup.personagens.Personagem;
 
 public class MenuOpcoes {
 	int resposta;
