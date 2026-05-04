@@ -10,38 +10,41 @@ import coup.personagens.Capitao;
 import coup.personagens.Condessa;
 import coup.personagens.Duque;
 import coup.personagens.Embaixador;
+import coup.personagens.Inquisidor;
 import coup.personagens.Personagem;
 
 public class App {
 
 	public static void main(String[] args) {
 
-		Scanner sc = new Scanner(System.in);
+		Console console = new Console();
 
 		// verifica quant de jogadores
-		int quantJogadores;
-		System.out.println("Digite número de jogadores:");
-		quantJogadores = sc.nextInt();
+		int quantJogadores = console.pedirQuantidadeJogadores();
 
 		// adiciona jogadores
 		List<Jogador> jogadoresList = new ArrayList<Jogador>();
-		String nome;
 		for (int i = 0; i < quantJogadores; i++) {
-			System.out.println("Digite o nome do " + (i + 1) + "º jogador:");
-			nome = sc.next();
+			String nome = console.pedirNomeJogador(i);
 			jogadoresList.add(new Jogador(i, nome));
 		}
-
+		
 		// separa quant de cartas de cada personagem com base na quant de jogadores
 		Baralho baralho = new Baralho();
 		
 		List<Personagem> personagensLista = new ArrayList<>();
-		// fazer jogo variado com inquisidor
 		personagensLista.add(new Assassino());
 		personagensLista.add(new Capitao());
 		personagensLista.add(new Condessa());
 		personagensLista.add(new Duque());
-		personagensLista.add(new Embaixador());
+		
+		// pergunta qual a versão do jogo
+		if (console.pedirVersãoJogo() == 1) {
+			personagensLista.add(new Embaixador());						
+		} else {
+			personagensLista.add(new Inquisidor());			
+		}
+		
 		List<Carta> baralhoCartas = baralho.gerarBaralho(quantJogadores, personagensLista);
 
 		// embaralha cartas
@@ -52,7 +55,6 @@ public class App {
 
 		/* verificao */
 		for (Jogador jogador : jogadoresList) {
-			System.out.println("---------------------");
 			System.out.println("jogador: " + jogador.getNome());
 			System.out.println("cartas: ");
 			for (Carta carta : jogador.getJogadorCartas().getCartas()) {
@@ -64,11 +66,10 @@ public class App {
 		MenuOpcoes menuOpcoes = new MenuOpcoes();
 		while (jogadoresList.size() > 1) {
 			for (Jogador jogador : jogadoresList) {
-				menuOpcoes.mostrarMenuAcoes(jogador, personagensLista, jogadoresList, sc);
+				menuOpcoes.mostrarMenuAcoes(jogador, personagensLista, jogadoresList);
 			}
 		}
 
-		sc.close();
 	}
 
 }
