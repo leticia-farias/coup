@@ -2,7 +2,6 @@ package coup;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import coup.jogador.Jogador;
 import coup.personagens.Assassino;
@@ -28,23 +27,23 @@ public class App {
 			String nome = console.pedirNomeJogador(i);
 			jogadoresList.add(new Jogador(i, nome));
 		}
-		
+
 		// separa quant de cartas de cada personagem com base na quant de jogadores
 		Baralho baralho = new Baralho();
-		
+
 		List<Personagem> personagensLista = new ArrayList<>();
 		personagensLista.add(new Assassino());
 		personagensLista.add(new Capitao());
 		personagensLista.add(new Condessa());
 		personagensLista.add(new Duque());
-		
+
 		// pergunta qual a versão do jogo
 		if (console.pedirVersãoJogo() == 1) {
-			personagensLista.add(new Embaixador());						
+			personagensLista.add(new Embaixador());
 		} else {
-			personagensLista.add(new Inquisidor());			
+			personagensLista.add(new Inquisidor());
 		}
-		
+
 		List<Carta> baralhoCartas = baralho.gerarBaralho(quantJogadores, personagensLista);
 
 		// embaralha cartas
@@ -62,14 +61,40 @@ public class App {
 			}
 		}
 
-		// 1º jogador escolhe a ação:
-		MenuOpcoes menuOpcoes = new MenuOpcoes();
 		while (jogadoresList.size() > 1) {
+			Personagem supostoPersonagem = null;
 			for (Jogador jogador : jogadoresList) {
-				menuOpcoes.mostrarMenuAcoes(jogador, personagensLista, jogadoresList);
-			}
-		}
 
+				switch (console.perguntarAcao(jogador, jogadoresList)) {
+					case 1:
+						console.informarDuque(jogador);
+						supostoPersonagem = new Duque();
+						break;
+
+					default:
+						break;
+				}
+
+				switch (console.perguntarRespostaAcao(jogador, supostoPersonagem, jogadoresList, true)) {
+					case 1:
+						console.selecionarContestador(jogadoresList, jogador, supostoPersonagem);
+						// contestar(jogadorDuvidando, jogador, supostoPersonagem);
+						break;
+
+					case 2:
+						System.out.println("Ninguém contestou, jogo segue");
+						break;
+
+					case 3:
+						System.out.println("Ninguém contestou, jogo segue");
+						break;
+
+					default:
+						break;
+				}
+			}
+
+		}
 	}
 
 }
