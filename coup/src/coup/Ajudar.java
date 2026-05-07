@@ -3,7 +3,7 @@ package coup;
 import coup.jogador.Jogador;
 import coup.personagens.PersonagensNomes;
 
-public class Receitar implements Acao {
+public class Ajudar implements Acao {
 
     @Override
     public boolean requerAlvo() {
@@ -12,7 +12,7 @@ public class Receitar implements Acao {
 
     @Override
     public boolean podeSerbloqueado() {
-        return false;
+        return true; 
     }
 
     @Override
@@ -32,7 +32,7 @@ public class Receitar implements Acao {
 
     @Override
     public void executar(Jogador autor, Jogador alvo) {
-        autor.setSaldo(autor.getSaldo() + 1);
-        System.out.println(autor.getNome() + " recebeu 1 moeda de renda.");
+        autor.setSaldo(autor.getSaldo() + 2);
+        System.out.println(autor.getNome() + " recebeu 2 moedas de ajuda externa.");
     }
 }

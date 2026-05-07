@@ -3,173 +3,279 @@ package coup;
 import java.util.List;
 import java.util.Scanner;
 
+import coup.acoes.Contestacao;
 import coup.jogador.Jogador;
 import coup.personagens.Personagem;
 
 public class Console {
 
-	Scanner sc = new Scanner(System.in);
-	
-	public int pedirQuantidadeJogadores() {
-		separarMensagens();
-		System.out.println("Digite número de jogadores:");
-		return sc.nextInt();
-	}
-	
-	public String pedirNomeJogador(int index) {
-		separarMensagens();
-		System.out.println("Digite o nome do " + (index + 1) + "º jogador:");
-		return sc.next();
-	}
-	
-	public int pedirVersãoJogo() {
-		separarMensagens();
-		System.out.println("Digite o número da versão do jogo");
-		System.out.println("1 - Com embaixador");
-		System.out.println("2 - Com inquisidor");
-		return sc.nextInt();
-	}
-	
-	public int perguntarAcao(Jogador jogador, List<Jogador> jogadoresLista) {
-		separarMensagens();
-		int saldoJogador = jogador.getSaldo();
+    Scanner sc = new Scanner(System.in);
 
+    private int lerInteiro() {
+        while (true) {
+            try {
+                return sc.nextInt();
+            } catch (Exception e) {
+                System.out.println("Entrada inválida. Digite um número:");
+                sc.next();
+            }
+        }
+    }
 
-		if (saldoJogador > 10) {
-			informarGolpe(jogador, jogadoresLista);
-		} else {
-			System.out.println("1 - Imposto (Duque)");
-			System.out.println("2 - Roubar (Capitão)");
-			System.out.println("3 - Trocar (Embaixador)");
-			System.out.println("3 - Ajuda externa");
-			System.out.println("4 - Pedir renda");
+    private String lerTexto() {
+        return sc.next();
+    }
 
-			if (saldoJogador > 3) {
-				System.out.println("5 - Assasinar (Assassino)");
-			}
-			if (saldoJogador > 7) {
-				System.out.println("6 - Golpe de estado");
-			}
-		}
+    public int pedirQuantidadeJogadores() {
+        int quantidade;
 
-		System.out.println(jogador.getNome() + " digite o número da ação:");
+        do {
+            separarMensagens();
+            System.out.println("Digite número de jogadores (2 a 6):");
+            quantidade = lerInteiro();
 
-		return sc.nextInt();
-	}
+            if (quantidade < 2 || quantidade > 6) {
+                System.out.println("Quantidade inválida. O jogo deve ter de 2 a 6 jogadores.");
+            }
 
-	public int perguntarRespostaAcao(Jogador jogadorAutor, Personagem supostoPersonagem, List<Jogador> jogadoresLista, boolean acaoPodeSerBloqueada) {
-		System.out.println("Alguém deseja contestar?");
-		System.out.println("1 - Contestar");
-		System.out.println("2 - Aceitar");
+        } while (quantidade < 2 || quantidade > 6);
 
-		if (acaoPodeSerBloqueada) { 
-			System.out.println("3 - Bloquear"); 
-		}
+        return quantidade;
+    }
 
-		return sc.nextInt();
-	}
+    public String pedirNomeJogador(int index) {
+        separarMensagens();
+        System.out.println("Digite o nome do " + (index + 1) + "º jogador:");
+        return lerTexto();
+    }
 
-	public void mostrarMenuJogadores(List<Jogador> jogadoresList, Jogador jogadorContestado,
-			boolean menuContestatores) {
-		if (menuContestatores) {
-			for (Jogador contestador : jogadoresList) {
-				if (!contestador.equals(jogadorContestado)) {
-					System.out.println(contestador.getId() + " - " + contestador.getNome());
-				}
-			}
-		} else {
-			for (Jogador j : jogadoresList) {
-				System.out.println(j.getId() + " - " + j.getNome());
-			}
-		}
+    public int pedirVersaoJogo() {
+        int versao;
 
-	}
-	
-	public int perguntarAlvo(Jogador jogadorAtual, List<Jogador> jogadoresLista) {
-		separarMensagens();
-		int saldoJogador = jogadorAtual.getSaldo();
-		
-		if (saldoJogador > 10) {
-			informarGolpe(jogadorAtual, jogadoresLista);
-		} else {
-			System.out.println("1 - Imposto (Duque)");
-			System.out.println("2 - Roubar (Capitão)");
-			System.out.println("3 - Trocar (Embaixador)");
-			System.out.println("3 - Ajuda externa");
-			System.out.println("4 - Pedir renda");
-			
-			if (saldoJogador > 3) {
-				System.out.println("5 - Assasinar (Assassino)");
-			}
-			if (saldoJogador > 7) {
-				System.out.println("6 - Golpe de estado");
-			}
-		}
-		
-		System.out.println(jogadorAtual.getNome() + " digite o número da ação:");
-		
-		return sc.nextInt();
-	}
+        do {
+            separarMensagens();
+            System.out.println("Digite o número da versão do jogo");
+            System.out.println("1 - Com embaixador");
+            System.out.println("2 - Com inquisidor");
 
-		public Jogador selecionarContestador(List<Jogador> jogadoresList, Jogador jogadorContestado, Personagem supostoPersonagem) {
-		
-		System.out.println("Quem está constestando " + jogadorContestado.getNome() + "?");
-		mostrarMenuJogadores(jogadoresList, jogadorContestado, true);
-		
-		System.out.println("Digite o número:");
-		int idContestador = sc.nextInt(); 
-		
-		Jogador contestador = new Jogador();
-		for (Jogador c : jogadoresList) {
-			if (c.getId() == idContestador) {
-				contestador = c;
-			}
-		}
-		return jogadorContestado;
-	}
+            versao = lerInteiro();
 
-	public void confirmarContestador() {
-		System.out.println("Confirmar que " + contestador.getNome() + " está contestando " + jogadorContestado.getNome() + ":");
-		System.out.println("1 - SIM");
-		System.out.println("2 - NÃO");
-		resposta = sc.nextInt();
-		
-		if (resposta == 1) {
-			contestacao.contestar(contestador, jogadorContestado, supostoPersonagem);
-		}
-	}
-	
-	public void mostrarCartas(Jogador jogador) {
-		System.out.println(jogador.getNome() + ", você tem as seguintes cartas: ");
-		
-		for (int i = 0; i < jogador.getJogadorCartas().getCartas().size(); i++) {
-			System.out.println(i + " - " + jogador.getJogadorCartas().getCartas().get(i).personagem.getNome());			
-		}
-		
-		/* com o ID da carta
-		for (Carta c : cartasEntity.cartas) {
-			System.out.println(c.getId() + " - " + c.getPersonagem().nome);			
-		}
-		*/
-	}
-	
-	public void informarGolpe(Jogador jogadorAtual, List<Jogador> jogadoresLista) {
-		separarMensagens();
-		System.out.println(jogadorAtual.getNome() + "  é obrigado a fazer golpe de estado");
-		perguntarAlvo(null, null);
-		System.out.println(jogadorAtual.getNome() + " digite o número do jogador para sofrer o golpe:");
-		
-	}
+            if (versao != 1 && versao != 2) {
+                System.out.println("Versão inválida. Escolha 1 ou 2.");
+            }
 
-	public void informarDuque(Jogador jogador) {
-		System.out.println(jogador.getNome() + " afirma ter o Duque e recebe 3 moedas de imposto");
-	}
-	
-	public void informarCapitao(Jogador jogador) {
-		System.out.println(jogador.getNome() + " afirma ter o capitão e recebe 3 moedas de imposto");
-	}
+        } while (versao != 1 && versao != 2);
 
-	public void separarMensagens() {
-		System.out.println("---------------------");
-	}
-}
+        return versao;
+    }
+
+    public int perguntarAcao(Jogador jogador, List<Jogador> jogadoresLista) {
+        separarMensagens();
+
+        int saldoJogador = jogador.getSaldo();
+
+        if (saldoJogador >= 10) {
+            informarGolpe(jogador, jogadoresLista);
+            return 7;
+        }
+
+        System.out.println("1 - Imposto (Duque)");
+        System.out.println("2 - Roubar (Capitão)");
+        System.out.println("3 - Trocar (Embaixador)");
+        System.out.println("4 - Ajuda externa");
+        System.out.println("5 - Pedir renda");
+
+        if (saldoJogador >= 3) {
+            System.out.println("6 - Assassinar (Assassino)");
+        }
+
+        if (saldoJogador >= 7) {
+            System.out.println("7 - Golpe de estado");
+        }
+
+        System.out.println(jogador.getNome() + ", digite o número da ação:");
+        return lerInteiro();
+    }
+//
+    public int perguntarRespostaAcao(
+            Jogador jogadorAutor,
+            Personagem supostoPersonagem,
+            List<Jogador> jogadoresLista,
+            boolean acaoPodeSerContestada,
+            boolean acaoPodeSerBloqueada
+    ) {
+
+        separarMensagens();
+
+        System.out.println("Como deseja responder?");
+
+        if (acaoPodeSerContestada) {
+            System.out.println("1 - Contestar");
+        }
+
+        System.out.println("2 - Aceitar");
+
+        if (acaoPodeSerBloqueada) {
+            System.out.println("3 - Bloquear");
+        }
+
+        return lerInteiro();
+    }
+
+    public void mostrarMenuJogadores(
+            List<Jogador> jogadoresList,
+            Jogador jogadorIgnorado,
+            boolean ignorarJogador
+    ) {
+        for (Jogador jogador : jogadoresList) {
+            if (!ignorarJogador || !jogador.equals(jogadorIgnorado)) {
+                System.out.println("- " + jogador.getNome());
+            }
+        }
+    }
+
+    public Jogador perguntarAlvo(Jogador jogadorAtual, List<Jogador> jogadoresLista) {
+        separarMensagens();
+        System.out.println(jogadorAtual.getNome() + ", escolha quem será o alvo:");
+
+        mostrarMenuJogadores(jogadoresLista, jogadorAtual, true);
+
+        System.out.println("Digite o nome:");
+        String nomeAlvo = lerTexto();
+
+        for (Jogador jogador : jogadoresLista) {
+            if (jogador.getNome().equalsIgnoreCase(nomeAlvo)
+                    && !jogador.equals(jogadorAtual)
+                    && jogador.isStatusAtivo()) {
+                return jogador;
+            }
+        }
+
+        System.out.println("Alvo inválido.");
+        return null;
+    }
+
+    public Jogador selecionarContestador(
+            List<Jogador> jogadoresList,
+            Jogador jogadorContestado,
+            Personagem supostoPersonagem
+    ) {
+        separarMensagens();
+        System.out.println("Quem está contestando " + jogadorContestado.getNome() + "?");
+
+        mostrarMenuJogadores(jogadoresList, jogadorContestado, true);
+
+        System.out.println("Digite o nome:");
+        String nomeContestador = lerTexto();
+
+        for (Jogador jogador : jogadoresList) {
+            if (jogador.getNome().equalsIgnoreCase(nomeContestador)
+                    && !jogador.equals(jogadorContestado)
+                    && jogador.isStatusAtivo()) {
+                return jogador;
+            }
+        }
+
+        System.out.println("Jogador inválido.");
+        return null;
+    }
+
+    public void confirmarContestador(
+            Jogador contestador,
+            Jogador jogadorContestado,
+            Personagem supostoPersonagem
+    ) {
+        if (contestador == null) {
+            System.out.println("Nenhum contestador válido.");
+            return;
+        }
+
+        System.out.println("Confirmar que " + contestador.getNome()
+                + " está contestando " + jogadorContestado.getNome() + "?");
+        System.out.println("1 - SIM");
+        System.out.println("2 - NÃO");
+
+        int resposta = lerInteiro();
+
+        if (resposta == 1) {
+            Contestacao contestacao = new Contestacao();
+            contestacao.contestar(contestador, jogadorContestado, supostoPersonagem);
+        }
+    }
+
+    public void mostrarCartas(Jogador jogador) {
+        System.out.println(jogador.getNome() + ", você tem as seguintes cartas:");
+
+        for (int i = 0; i < jogador.getJogadorCartas().getCartas().size(); i++) {
+            Carta carta = jogador.getJogadorCartas().getCartas().get(i);
+
+            String status = carta.isStatusAtiva() ? "ativa" : "morta";
+
+            System.out.println(i + " - " + carta.getPersonagem().getNome() + " (" + status + ")");
+        }
+    }
+
+    public void mostrarSaldos(List<Jogador> jogadoresList) {
+        separarMensagens();
+        System.out.println("SALDO DOS JOGADORES:");
+
+        for (Jogador jogador : jogadoresList) {
+            System.out.println(jogador.getNome() + ": " + jogador.getSaldo() + " moedas");
+        }
+    }
+
+    public void informarGolpe(Jogador jogadorAtual, List<Jogador> jogadoresLista) {
+        separarMensagens();
+        System.out.println(jogadorAtual.getNome() + " é obrigado a fazer golpe de estado.");
+    }
+
+    public void informarDuque(Jogador jogador) {
+        System.out.println(jogador.getNome() + " afirma ter o Duque e recebe 3 moedas de imposto.");
+    }
+
+    public void informarCapitao(Jogador jogador) {
+        System.out.println(jogador.getNome() + " afirma ter o Capitão e tenta roubar 2 moedas.");
+    }
+
+    public void separarMensagens() {
+        System.out.println("---------------------");
+    }
+    
+    public Jogador selecionarBloqueador(List<Jogador> jogadoresList, Jogador jogadorAutor) {
+
+        separarMensagens();
+        System.out.println("Quem está bloqueando " + jogadorAutor.getNome() + "?");
+
+        mostrarMenuJogadores(jogadoresList, jogadorAutor, true);
+
+        System.out.println("Digite o nome:");
+        String nomeBloqueador = lerTexto();
+
+        for (Jogador jogador : jogadoresList) {
+
+            if (jogador.getNome().equalsIgnoreCase(nomeBloqueador)
+                    && !jogador.equals(jogadorAutor)
+                    && jogador.isStatusAtivo()) {
+
+                return jogador;
+            }
+        }
+
+        System.out.println("Bloqueador inválido.");
+        return null;
+    }
+
+    public int perguntarContestacaoBloqueio(Jogador bloqueador) {
+
+        separarMensagens();
+
+        System.out.println(bloqueador.getNome() + " está bloqueando.");
+        System.out.println("Alguém deseja contestar o bloqueio?");
+
+        System.out.println("1 - Contestar bloqueio");
+        System.out.println("2 - Aceitar bloqueio");
+
+        return lerInteiro();
+    }
+
+}   

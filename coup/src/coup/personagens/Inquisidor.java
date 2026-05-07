@@ -8,11 +8,7 @@ public class Inquisidor extends Personagem {
 	}
 
 	public Inquisidor() {
-		// TODO Auto-generated constructor stub
+		super(PersonagensNomes.INQUISIDOR);
 	}
 
-	@Override
-	public void acao() {
-		 System.out.println("pegar 3 moedas");
-	 }
 }

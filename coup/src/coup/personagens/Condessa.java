@@ -6,9 +6,6 @@ public class Condessa extends Personagem {
 		super(PersonagensNomes.CONDESSA);
 	}
 
-	@Override
-	public void acao() {
-		 System.out.println("pegar 3 moedas");
-	 }
+	
 
 }

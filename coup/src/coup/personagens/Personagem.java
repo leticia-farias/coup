@@ -7,9 +7,7 @@ public abstract class Personagem {
 	public Personagem(PersonagensNomes nome) {
 		this.nome = nome;
 	}
-
-	public abstract void acao();
-
+	
 	public PersonagensNomes getNome() {
 		return nome;
 	}

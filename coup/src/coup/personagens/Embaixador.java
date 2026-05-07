@@ -7,9 +7,5 @@ public class Embaixador extends Personagem {
 		super(PersonagensNomes.EMBAIXADOR);
 	}
 
-	@Override
-	public void acao() {
-		 System.out.println("pegar 3 moedas");
-	 }
 
 }

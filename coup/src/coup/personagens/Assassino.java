@@ -7,8 +7,4 @@ public class Assassino extends Personagem {
 		super(PersonagensNomes.ASSASSINO);
 	}
 
-	@Override
-	public void acao() {
-		 System.out.println("pegar 3 moedas");
-	 }
 }

@@ -8,114 +8,125 @@ import coup.personagens.Personagem;
 
 public class Jogador {
 
-	int id;
-	String nome;
-	int saldo = 2;
-	JogadorCartas jogadorCartas = new JogadorCartas();
-	boolean statusAtivo = true;
-	
-	Scanner sc = new Scanner(System.in);
-	int resposta;
-	Personagem p = null;
-	MenuOpcoes menu = new MenuOpcoes();
-	
-	public Personagem escolherCartaParaMostrar() {
+    int id;
+    String nome;
+    int saldo = 2;
+    JogadorCartas jogadorCartas = new JogadorCartas();
+    boolean statusAtivo = true;
 
-		// SE TIVER AS DUAS CARTAS AINDA
-		if (jogadorCartas.isStatusCompleto()) {
+    Scanner sc = new Scanner(System.in);
+    MenuOpcoes menu = new MenuOpcoes();
 
-			menu.mostrarCartas(this);
-			System.out.println("DIGITE O NÚMERO DE QUAL CARTA DESEJA MOSTRAR: ");
-			
-			resposta = sc.nextInt();
+    public Personagem escolherCartaParaMostrar() {
+        while (true) {
+            menu.mostrarCartas(this);
+            System.out.println("DIGITE O NÚMERO DA CARTA QUE DESEJA MOSTRAR:");
 
-			if (resposta == 0) {
-				p = jogadorCartas.getCartas().get(0).getPersonagem();
-			} else {
-				p = jogadorCartas.getCartas().get(1).getPersonagem();
-			}
+            int resposta;
 
-		} else {
-			for (Carta carta : jogadorCartas.getCartas()) {
-				if (carta.isStatusAtiva()) {
-					p = carta.getPersonagem();
-				}
-			}
-		}
+            try {
+                resposta = sc.nextInt();
+            } catch (Exception e) {
+                System.out.println("Entrada inválida. Digite apenas o número da carta.");
+                sc.next();
+                continue;
+            }
 
-		return p;
-	}
+            if (resposta >= 0 && resposta < jogadorCartas.getCartas().size()) {
+                Carta cartaEscolhida = jogadorCartas.getCartas().get(resposta);
 
-	public void escolherCartaParaMorrer() {
-		int r = -1;
-		
-		// SE TIVER AS DUAS CARTAS AINDA
-		if (jogadorCartas.statusCompleto) {
+                if (cartaEscolhida.isStatusAtiva()) {
+                    return cartaEscolhida.getPersonagem();
+                } else {
+                    System.out.println("Essa carta já está morta. Escolha outra.");
+                }
+            } else {
+                System.out.println("Número inválido. Escolha uma carta da lista.");
+            }
+        }
+    }
 
-			menu.mostrarCartas(this);
-			System.out.println("DIGITE O NÚMERO DE QUAL CARTA VOCÊ DESEJA MATAR");
-			//p = escolherCarta();
-			r = sc.nextInt();
+    public void escolherCartaParaMorrer() {
+        menu.mostrarCartas(this);
+        System.out.println("DIGITE O NÚMERO DE QUAL CARTA VOCÊ DESEJA MATAR:");
+        int r = sc.nextInt();
 
-		} else {
-			for (Carta carta : jogadorCartas.cartas) {
-				if (carta.isStatusAtiva()) {
-					//p = carta.personagem;
-					r = sc.nextInt();
-				}
-			}
-		}
-		
-		//cartasEntity.cartas.remove(p);
-		jogadorCartas.cartas.remove(r);
-	}
-	
-	public Jogador(int id, String nome) {
-		this.id = id;
-		this.nome = nome;
-	}
+        if (r >= 0 && r < jogadorCartas.getCartas().size()) {
+            Carta cartaEscolhida = jogadorCartas.getCartas().get(r);
 
-	public Jogador() {
-	}
-	
-	public int getId() {
-		return id;
-	}
-	
-	public void setId(int id) {
-		this.id = id;
-	}
+            if (cartaEscolhida.isStatusAtiva()) {
+                cartaEscolhida.setStatusAtiva(false);
+                System.out.println(nome + " perdeu a carta " + cartaEscolhida.getPersonagem().getNome());
+            } else {
+                System.out.println("Essa carta já está morta.");
+                return;
+            }
+        } else {
+            System.out.println("Carta inválida.");
+            return;
+        }
 
-	public String getNome() {
-		return nome;
-	}
+        atualizarStatus();
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void atualizarStatus() {
+        boolean temCartaAtiva = false;
 
-	public int getSaldo() {
-		return saldo;
-	}
+        for (Carta carta : jogadorCartas.getCartas()) {
+            if (carta.isStatusAtiva()) {
+                temCartaAtiva = true;
+                break;
+            }
+        }
 
-	public void setSaldo(int saldo) {
-		this.saldo = saldo;
-	}
+        this.statusAtivo = temCartaAtiva;
+    }
 
-	public JogadorCartas getJogadorCartas() {
-		return jogadorCartas;
-	}
+    public Jogador(int id, String nome) {
+        this.id = id;
+        this.nome = nome;
+    }
 
-	public void setJogadorCartas(JogadorCartas jogadorCartas) {
-		this.jogadorCartas = jogadorCartas;
-	}
+    public Jogador() {
+    }
 
-	public boolean isStatusAtivo() {
-		return statusAtivo;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setStatusAtivo(boolean statusAtivo) {
-		this.statusAtivo = statusAtivo;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public int getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(int saldo) {
+        this.saldo = saldo;
+    }
+
+    public JogadorCartas getJogadorCartas() {
+        return jogadorCartas;
+    }
+
+    public void setJogadorCartas(JogadorCartas jogadorCartas) {
+        this.jogadorCartas = jogadorCartas;
+    }
+
+    public boolean isStatusAtivo() {
+        return statusAtivo;
+    }
+
+    public void setStatusAtivo(boolean statusAtivo) {
+        this.statusAtivo = statusAtivo;
+    }
 }

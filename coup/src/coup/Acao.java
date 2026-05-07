@@ -1,6 +1,7 @@
 package coup;
 
 import coup.jogador.Jogador;
+import coup.personagens.PersonagensNomes;
 
 public interface Acao {
 	
@@ -14,4 +15,7 @@ public interface Acao {
 
 	// obs.: representa a interface comando do command pattern
 	// as classes de cada ação (ex. ducar) representa os comandos concretos
+
+	    PersonagensNomes getPersonagemNecessario();
+
 }
