@@ -1,9 +1,9 @@
-package coup;
+package coup.acoes;
 
-import coup.jogador.Jogador;
-import coup.personagens.PersonagensNomes;
+import coup.model.Jogador;
+import coup.model.PersonagensNomes;
 
-public class Ducar implements Acao {
+public class Ajudar implements Acao {
 
     @Override
     public boolean requerAlvo() {
@@ -12,12 +12,12 @@ public class Ducar implements Acao {
 
     @Override
     public boolean podeSerbloqueado() {
-        return false;
+        return true; 
     }
 
     @Override
     public boolean podeSerContestada() {
-        return true;
+        return false;
     }
 
     @Override
@@ -27,13 +27,12 @@ public class Ducar implements Acao {
 
     @Override
     public PersonagensNomes getPersonagemNecessario() {
-        return PersonagensNomes.DUQUE;
+        return null;
     }
 
-	// duque: pegua 3 moedas do jogo
     @Override
     public void executar(Jogador autor, Jogador alvo) {
-        System.out.println(autor.getNome() + " usa Duque (Imposto) e ganha 3 moedas.");
-        autor.setSaldo(autor.getSaldo() + 3);
+        autor.setSaldo(autor.getSaldo() + 2);
+        System.out.println(autor.getNome() + " recebeu 2 moedas de ajuda externa.");
     }
 }

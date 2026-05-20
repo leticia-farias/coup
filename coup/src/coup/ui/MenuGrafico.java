@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import coup.jogador.Jogador;
-import coup.personagens.Personagem;
+import coup.model.Jogador;
+import coup.model.Personagem;
 
 public class MenuGrafico {
 
@@ -80,7 +80,7 @@ public class MenuGrafico {
             texto.append("Jogador: ").append(jogador.getNome()).append("\n");
             texto.append("Cartas:\n");
 
-            for (coup.Carta carta : jogador.getJogadorCartas().getCartas()) {
+            for (coup.model.Carta carta : jogador.getJogadorCartas().getCartas()) {
                 texto.append("- ")
                      .append(carta.getPersonagem().getNome())
                      .append("\n");
@@ -105,7 +105,7 @@ public class MenuGrafico {
         texto.append(jogador.getNome())
              .append(", suas cartas são:\n\n");
 
-        for (coup.Carta carta : jogador.getJogadorCartas().getCartas()) {
+        for (coup.model.Carta carta : jogador.getJogadorCartas().getCartas()) {
 
             texto.append("- ")
                  .append(carta.getPersonagem().getNome())

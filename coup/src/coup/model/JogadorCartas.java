@@ -1,9 +1,7 @@
-package coup.jogador;
+package coup.model;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import coup.Carta;
 
 public class JogadorCartas {
 

@@ -1,10 +1,8 @@
-package coup.jogador;
+package coup.model;
 
 import java.util.Scanner;
 
-import coup.Carta;
-import coup.MenuOpcoes;
-import coup.personagens.Personagem;
+import coup.view.MenuOpcoes;
 
 public class Jogador {
 

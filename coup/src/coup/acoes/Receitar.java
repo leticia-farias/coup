@@ -1,7 +1,7 @@
-package coup;
+package coup.acoes;
 
-import coup.jogador.Jogador;
-import coup.personagens.PersonagensNomes;
+import coup.model.Jogador;
+import coup.model.PersonagensNomes;
 
 public class Receitar implements Acao {
 

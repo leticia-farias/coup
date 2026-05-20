@@ -1,18 +1,21 @@
-package coup;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
-import coup.jogador.Jogador;
-import coup.personagens.Assassino;
-import coup.personagens.Capitao;
-import coup.personagens.Condessa;
-import coup.personagens.Duque;
-import coup.personagens.Embaixador;
-import coup.personagens.Inquisidor;
-import coup.personagens.Personagem;
+import coup.model.Assassino;
+import coup.model.Baralho;
+import coup.model.Capitao;
+import coup.model.Carta;
+import coup.model.Condessa;
+import coup.model.Duque;
+import coup.model.Embaixador;
+import coup.model.Inquisidor;
+import coup.model.Jogador;
+import coup.model.Personagem;
 import coup.ui.MenuGrafico;
 import coup.ui.TelaJogo;
+import coup.view.Console;
 
 public class App {
 

@@ -1,13 +1,13 @@
-package coup;
+package coup.view;
 
 import java.util.List;
 import java.util.Scanner;
 
-import coup.acoes.Contestacao;
-import coup.jogador.Jogador;
-import coup.personagens.Personagem;
+import coup.model.Carta;
+import coup.model.Jogador;
+import coup.model.Personagem;
 
-public class Console {
+public class Console implements IJogoView {
 
     Scanner sc = new Scanner(System.in);
 
@@ -26,6 +26,7 @@ public class Console {
         return sc.next();
     }
 
+    @Override
     public int pedirQuantidadeJogadores() {
         int quantidade;
 
@@ -43,12 +44,14 @@ public class Console {
         return quantidade;
     }
 
+    @Override
     public String pedirNomeJogador(int index) {
         separarMensagens();
         System.out.println("Digite o nome do " + (index + 1) + "º jogador:");
         return lerTexto();
     }
 
+    @Override
     public int pedirVersaoJogo() {
         int versao;
 
@@ -69,6 +72,7 @@ public class Console {
         return versao;
     }
 
+    @Override
     public int perguntarAcao(Jogador jogador, List<Jogador> jogadoresLista) {
         separarMensagens();
 
@@ -134,6 +138,7 @@ public class Console {
         }
     }
 
+    @Override
     public Jogador perguntarAlvo(Jogador jogadorAtual, List<Jogador> jogadoresLista) {
         separarMensagens();
         System.out.println(jogadorAtual.getNome() + ", escolha quem será o alvo:");
@@ -198,8 +203,8 @@ public class Console {
         int resposta = lerInteiro();
 
         if (resposta == 1) {
-            Contestacao contestacao = new Contestacao();
-            contestacao.contestar(contestador, jogadorContestado, supostoPersonagem);
+            //Contestacao contestacao = new Contestacao();
+            //contestacao.contestar(contestador, jogadorContestado, supostoPersonagem);
         }
     }
 
@@ -277,5 +282,23 @@ public class Console {
 
         return lerInteiro();
     }
+
+	@Override
+	public void mostrarCartas() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void pedirAcao() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mostrarLog() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }   

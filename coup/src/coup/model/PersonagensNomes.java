@@ -1,4 +1,4 @@
-package coup.personagens;
+package coup.model;
 
 public enum PersonagensNomes {
 

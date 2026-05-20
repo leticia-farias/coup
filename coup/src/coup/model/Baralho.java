@@ -1,11 +1,8 @@
-package coup;
+package coup.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import coup.jogador.Jogador;
-import coup.personagens.Personagem;
 
 public class Baralho {
 	

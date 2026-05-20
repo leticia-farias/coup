@@ -1,6 +1,7 @@
-package coup;
+package coup.view;
 
-import coup.jogador.Jogador;
+import coup.model.Carta;
+import coup.model.Jogador;
 
 public class MenuOpcoes {
 

@@ -1,4 +1,4 @@
-package coup.jogador;
+package coup.model;
 
 public class JogadorSaldo {
 	
