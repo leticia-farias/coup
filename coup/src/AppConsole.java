@@ -15,7 +15,7 @@ public class AppConsole {
 		JogoController controller = new JogoController(view);
 
 		// dar start
-
-		
+		controller.prepararJogo();
+		controller.iniciarPartida();
     }
 }
