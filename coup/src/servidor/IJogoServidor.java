@@ -3,11 +3,9 @@ package servidor;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import coup.acoes.Acao;
-import coup.model.Jogador;
+import cliente.IClient;
 
 public interface IJogoServidor extends Remote {
 
-	public void entrarJogo() throws RemoteException;
-
+	 void entrarJogo(IClient cliente, String nomeJogador) throws RemoteException;
 }
