@@ -5,45 +5,32 @@ import coup.model.Baralho;
 
 public class FactoryVersaoOriginal implements IJogoFactory {
 	
-	private Acao acao;
-
 	@Override
 	public Acao acoes(int opcao, Baralho baralho) {
+		Acao acao = null;
 		switch (opcao) {
 		case 1:
-			acao = new Receitar();
-			break;
-
-		case 2:
-			acao = new Ajudar();
-			break;
-
-		case 3:
 			acao = new Ducar();
 			break;
-
-		case 4:
+		case 2:
 			acao = new Capitar();
 			break;
-
+		case 3:
+			acao = new Embaixadar(baralho);
+			break;
+		case 4:
+			acao = new Ajudar();
+			break;
 		case 5:
-			acao = new Ducar();
+			acao = new Receitar();
 			break;
-
 		case 6:
-			acao = new Embaixadar(baralho); // embaixar
+			acao = new Assassinar();
 			break;
-
 		case 7:
-			acao = new Assassinar(); // assassinar
-			break;
-
-		case 8:
 			acao = new Golpear();
 			break;
 		}
-		
 		return acao;
 	}
-
 }
