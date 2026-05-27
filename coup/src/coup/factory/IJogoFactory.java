@@ -1,11 +1,10 @@
 package coup.factory;
 
 import coup.acoes.Acao;
+import coup.model.Baralho;
 
-public abstract class IJogoFactory {
+public interface IJogoFactory {
 	
-	protected Acao acao;
-
-	protected abstract Acao acoes(int opcao);
+	public Acao acoes(int opcao, Baralho baralho);
 	
 }

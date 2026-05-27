@@ -1,11 +1,14 @@
 package coup.acoes;
 
 import coup.factory.IJogoFactory;
+import coup.model.Baralho;
 
-public class FactoryVersaoOriginal extends IJogoFactory {
+public class FactoryVersaoOriginal implements IJogoFactory {
+	
+	private Acao acao;
 
 	@Override
-	public Acao acoes(int opcao) {
+	public Acao acoes(int opcao, Baralho baralho) {
 		switch (opcao) {
 		case 1:
 			acao = new Receitar();
@@ -28,11 +31,11 @@ public class FactoryVersaoOriginal extends IJogoFactory {
 			break;
 
 		case 6:
-			acao = new Ducar(); // embaixar
+			acao = new Embaixadar(baralho); // embaixar
 			break;
 
 		case 7:
-			acao = new Ducar(); // assassinar
+			acao = new Assassinar(); // assassinar
 			break;
 
 		case 8:
