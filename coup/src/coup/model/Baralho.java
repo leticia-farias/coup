@@ -8,42 +8,50 @@ import coup.factory.IJogoFactory;
 
 public class Baralho {
 	
-	List<Personagem> personagensLista;
-	List<Carta> baralhoCartas;
+	// Inicialização direta para evitar NullPointerException
+	List<Personagem> personagensLista = new ArrayList<>();
+	List<Carta> baralhoCartas = new ArrayList<>();
 	
 	public Baralho(List<Personagem> personagensLista, List<Carta> baralhoCartas) {
-		this.personagensLista = new ArrayList<>();
-		this.baralhoCartas = new ArrayList<>();
+		this.personagensLista = personagensLista;
+		this.baralhoCartas = baralhoCartas;
 	}
 
-	public Baralho() { }
+	public Baralho() { 
+		// Construtor vazio agora é seguro pois as listas já foram inicializadas acima
+	}
 
 	public List<Carta> gerarBaralho(int quantJogadores, IJogoFactory tipoJogo) {
+        // Limpa a lista para garantir que não acumula se for chamado mais de uma vez
+		personagensLista.clear(); 
+		baralhoCartas.clear();
+
 		personagensLista.add(new Assassino());
 		personagensLista.add(new Capitao());
 		personagensLista.add(new Condessa());
 		personagensLista.add(new Duque());
 		
-		//int quantCartas;
+		// DICA: Como você passou o tipoJogo (Factory), você pode adicionar a lógica 
+		// para colocar o Embaixador ou Inquisidor aqui. Exemplo:
+		if (tipoJogo.getClass().getSimpleName().equals("FactoryVersaoOriginal")) {
+			personagensLista.add(new Embaixador());
+		} else {
+			personagensLista.add(new Inquisidor());
+		}
+		
 		int quantCartasPorPersonagem;
-		// int quantPersonagens = 4;
 		
 		// 3 cartas para cada personagem
 		if (quantJogadores <= 6) {
 			quantCartasPorPersonagem = 3;
-			//quantCartas = quantPersonagens * quantCartasPorPersonagem;
 			
 			for (int i = 0; i < quantCartasPorPersonagem; i++) {
 				for (Personagem p : personagensLista) {
 					baralhoCartas.add(new Carta(p));					
 				}
 			}
-			
-		} else if (quantJogadores <= 8) {
-			// 4
-			
 		} else {
-			// 5 cartas
+			// Adicionar lógica para 7-8 jogadores futuramente
 		}
 	
 		baralhoCartas = embaralharCartas(baralhoCartas);

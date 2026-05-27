@@ -1,11 +1,9 @@
 package coup.estadoJogo;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import coup.acoes.Acao;
 import coup.model.Carta;
 import coup.model.Jogador;
+import coup.model.PersonagensNomes;
 
 public class AguardandoRespostaAcao implements IEstadoJogo {
 
@@ -22,18 +20,17 @@ public class AguardandoRespostaAcao implements IEstadoJogo {
 
 	@Override
 	public void responderAcao(Jogador respondente, int resposta) {
-		// contestacao
-		if (resposta == 1) {
-			// TODO: resolver problema com construtor
-//			contexto.setEstado(new ResolvendoContestacao(contexto, respondente));
+		
+		if (resposta == 1) { // 1 - Contestar
+			PersonagensNomes personagemNecessario = contexto.getAcaoPendente().getPersonagemNecessario();
+			contexto.setEstado(new ResolvendoContestacao(contexto, contexto.getJogadorAutor(), respondente, personagemNecessario));
 			
-		// bloqueio
-		} else if (resposta == 2) {
-			// TODO: resolver problema com construtor
-//			contexto.setEstado(new AguardandoRespostaBloqueio(contexto, respondente));
+		} else if (resposta == 3) { // 3 - Bloquear
+			// Passamos null temporariamente no personagem pois o bloqueio 
+			// pode vir de personagens diferentes (ex: Capitão bloqueado por Capitão ou Embaixador)
+			contexto.setEstado(new AguardandoRespostaBloqueio(contexto, respondente, null));
 			
-		// aceite
-		} else {
+		} else { // 2 - Aceitar
 			contexto.registrarAceites();
 		}
 
@@ -41,7 +38,7 @@ public class AguardandoRespostaAcao implements IEstadoJogo {
 
 	@Override
 	public void descartarCarta(Carta carta) {
-		throw new IllegalStateException("Não é o momento de descartas cartas.");
+		throw new IllegalStateException("Não é o momento de descartar cartas.");
 	}
 
 }

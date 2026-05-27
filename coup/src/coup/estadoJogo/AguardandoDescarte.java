@@ -15,6 +15,10 @@ public class AguardandoDescarte implements IEstadoJogo {
 		this.jogadorQueDescarta = jogadorQueDescarta;
 		this.cancelarAcaoOriginal = cancelarAcaoOriginal;
 	}
+	
+	public Jogador getJogadorQueDescarta() {
+		return jogadorQueDescarta;
+	}
 
 	@Override
 	public void descartarCarta(Carta cartaEscolhida) {

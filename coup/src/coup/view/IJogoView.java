@@ -25,7 +25,7 @@ public interface IJogoView {
 	
 	public void mostrarCartas();
 	public void pedirAcao();
-	public void mostrarLog();
+	public void mostrarLog(String mensagem);
 
 	public int perguntarModo();
 	public int perguntarOpcaoHerença();

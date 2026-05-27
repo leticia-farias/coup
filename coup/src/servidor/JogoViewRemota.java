@@ -86,10 +86,18 @@ public class JogoViewRemota implements IJogoView {
 	}
 
 	@Override
-	public int perguntarRespostaAcao(Jogador jogadorAutor, Personagem supostoPersonagem, List<Jogador> jogadoresLista,
-			boolean acaoPodeSerContestada, boolean acaoPodeSerBloqueada) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int perguntarRespostaAcao(Jogador respondente, Personagem supostoPersonagem, List<Jogador> jogadoresLista, boolean acaoPodeSerContestada, boolean acaoPodeSerBloqueada) {
+		try {
+			// Busca a conexão de rede do jogador que precisa responder
+			IClient client = clientes.get(respondente.getNome());
+			
+			// Chama a tela do cliente perguntando o que ele quer fazer
+			return client.pedirRespostaReacao("um jogador", acaoPodeSerContestada, acaoPodeSerBloqueada);
+		} catch (RemoteException e) {
+			System.err.println("Erro ao contactar o cliente " + respondente.getNome());
+			e.printStackTrace();
+			return 2; // Em caso de erro de rede, assume "2" (Aceitar) para não travar o jogo
+		}
 	}
 
 	@Override
