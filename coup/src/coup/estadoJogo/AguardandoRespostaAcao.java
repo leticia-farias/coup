@@ -4,63 +4,44 @@ import java.util.HashSet;
 import java.util.Set;
 
 import coup.acoes.Acao;
+import coup.model.Carta;
 import coup.model.Jogador;
 
 public class AguardandoRespostaAcao implements IEstadoJogo {
-	
+
 	private ContextoJogo contexto;
-	private Acao acaoPendente;
-	private Set<Jogador> jogadoresQueAceitaram;
 
-	public AguardandoRespostaAcao(ContextoJogo contexto, Acao acaoPendente, Set<Jogador> jogadoresQueAceitaram) {
+	public AguardandoRespostaAcao(ContextoJogo contexto) {
 		this.contexto = contexto;
-		this.acaoPendente = acaoPendente;
-		this.jogadoresQueAceitaram = new HashSet<Jogador>();
 	}
 
 	@Override
-	public void aguardandoAcao(Acao acao) {
-		// TODO Auto-generated method stub
-
+	public void escolherAcao(Acao acao) {
+		throw new IllegalStateException("Ação já foi escolhida. Aguardando respostas.");
 	}
 
 	@Override
-	public void aguardandoRespostaAcao() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void aguardandoRespostaBloqueio() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void resolvendoDesafio() {
-		// TODO Auto-generated method stub
+	public void responderAcao(Jogador respondente, int resposta) {
+		// contestacao
+		if (resposta == 1) {
+			// TODO: resolver problema com construtor
+//			contexto.setEstado(new ResolvendoContestacao(contexto, respondente));
+			
+		// bloqueio
+		} else if (resposta == 2) {
+			// TODO: resolver problema com construtor
+//			contexto.setEstado(new AguardandoRespostaBloqueio(contexto, respondente));
+			
+		// aceite
+		} else {
+			contexto.registrarAceites();
+		}
 
 	}
 
 	@Override
-	public void aguardandoDescarte() {
-		// TODO Auto-generated method stub
-
+	public void descartarCarta(Carta carta) {
+		throw new IllegalStateException("Não é o momento de descartas cartas.");
 	}
 
-	@Override
-	public void executandoAcao(Acao acao) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void trocaTurno(Jogador jogador) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void jogadoresQueVotaram() {
-		
-	}
 }
