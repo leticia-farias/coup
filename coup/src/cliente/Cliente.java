@@ -69,6 +69,16 @@ public class Cliente extends UnicastRemoteObject implements IClient {
         }
         System.out.println("---------------------------");
     }
+    
+    @Override
+    public int pedirDescarte(String nome, List<String> cartasAtivas) throws RemoteException {
+        System.out.println("\n[URGENTE] " + nome + ", perdeu uma vida! Escolha uma carta para descartar:");
+        for (int i = 0; i < cartasAtivas.size(); i++) {
+            System.out.println((i + 1) + " - " + cartasAtivas.get(i));
+        }
+        System.out.print("Digite o número da carta: ");
+        return sc.nextInt() - 1; // Retorna o índice (0 ou 1) para o servidor
+    }
 
     public static void main(String[] args) {
         try {
@@ -89,5 +99,14 @@ public class Cliente extends UnicastRemoteObject implements IClient {
             System.err.println("Erro ao conectar no servidor: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    @Override
+    public void mostrarSuasCartas(List<String> cartas) throws RemoteException {
+        System.out.println("\n--- SUAS CARTAS ---");
+        for (String c : cartas) {
+            System.out.println("- " + c);
+        }
+        System.out.println("-------------------");
     }
 }

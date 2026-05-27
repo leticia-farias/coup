@@ -99,6 +99,54 @@ public class JogoViewRemota implements IJogoView {
 			return 2; // Em caso de erro de rede, assume "2" (Aceitar) para não travar o jogo
 		}
 	}
+	
+	@Override
+	public coup.model.Carta pedirCartaParaDescarte(Jogador jogador) {
+		try {
+			IClient client = clientes.get(jogador.getNome());
+			List<String> nomesCartas = new ArrayList<>();
+			List<coup.model.Carta> cartasAtivas = new ArrayList<>();
+
+			// Recolhe apenas as cartas que ainda estão vivas
+			for (coup.model.Carta c : jogador.getJogadorCartas().getCartas()) {
+				if (c.isStatusAtiva()) {
+					nomesCartas.add(c.getPersonagem().getNome().toString());
+					cartasAtivas.add(c);
+				}
+			}
+
+			// Se só tiver uma carta, o cliente também pode apenas ver e ser forçado a escolhê-la
+			int indexEscolhido = client.pedirDescarte(jogador.getNome(), nomesCartas);
+			
+			// Prevenção de erros caso o jogador digite um número fora do limite
+			if (indexEscolhido < 0 || indexEscolhido >= cartasAtivas.size()) {
+				indexEscolhido = 0; 
+			}
+			
+			return cartasAtivas.get(indexEscolhido);
+
+		} catch (RemoteException e) {
+			System.err.println("Erro ao contactar o cliente " + jogador.getNome() + " para descarte.");
+			// Em caso de falha de rede, mata a primeira carta ativa que encontrar para o jogo não travar
+			for (coup.model.Carta c : jogador.getJogadorCartas().getCartas()) {
+				if (c.isStatusAtiva()) return c;
+			}
+		}
+		return null;
+	}
+	
+	public void enviarCartasParaJogador(Jogador jogador) {
+	    try {
+	        IClient client = clientes.get(jogador.getNome());
+	        List<String> nomesCartas = new ArrayList<>();
+	        for (coup.model.Carta c : jogador.getJogadorCartas().getCartas()) {
+	            nomesCartas.add(c.getPersonagem().getNome().toString() + (c.isStatusAtiva() ? " (Ativa)" : " (Morta)"));
+	        }
+	        client.mostrarSuasCartas(nomesCartas);
+	    } catch (RemoteException e) {
+	        e.printStackTrace();
+	    }
+	}
 
 	@Override
 	public void pedirAcao() {

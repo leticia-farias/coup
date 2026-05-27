@@ -20,17 +20,19 @@ public class ResolvendoContestacao implements IEstadoJogo {
 		this.personagemContestado = personagemContestado;
 	}
 
-	private void resolverContestacao() {
-		
-		// TODO: jogador deve escolher qual carta mostrar, pois mesmo que ele tenha, pode escolher não revelar (maluquice mas estratégia)
-		boolean temCarta = contestado.getJogadorCartas().getCartas().stream()
-				.anyMatch(c -> c.isStatusAtiva() && c.getPersonagem().getNome() == personagemContestado);
-		
-		if (temCarta) {
-			contexto.setEstado(new AguardandoDescarte(contexto, contestador, false));
-		} else {
-			contexto.setEstado(new AguardandoDescarte(contexto, contestador, true));
-		}
+	public void resolverContestacao() {
+	    boolean temCarta = contestado.getJogadorCartas().getCartas().stream()
+	            .anyMatch(c -> c.isStatusAtiva() && c.getPersonagem().getNome() == personagemContestado);
+
+	    if (temCarta) {
+	        // O autor TEM a carta. O contestador mentiu/errou e perde a carta.
+	        // Ação original continua (cancelarAcaoOriginal = false)
+	        contexto.setEstado(new AguardandoDescarte(contexto, contestador, false));
+	    } else {
+	        // O autor NÃO TEM a carta. O autor perde a carta.
+	        // Ação original é cancelada (cancelarAcaoOriginal = true)
+	        contexto.setEstado(new AguardandoDescarte(contexto, contestado, true));
+	    }
 	}
 	
 	@Override

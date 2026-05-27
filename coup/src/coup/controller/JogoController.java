@@ -2,6 +2,7 @@ package coup.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import coup.acoes.Acao;
 import coup.acoes.FactoryVersaoInquisidor;
@@ -99,7 +100,10 @@ public class JogoController {
 		} else {
 			this.contexto.setJogadorAutor(jogadorAtual);
 		}
-
+		
+		if (view instanceof servidor.JogoViewRemota) {
+		    ((servidor.JogoViewRemota) view).enviarCartasParaJogador(jogadorAtual);
+		}
 		int respostaAcao = view.perguntarAcao(jogadorAtual);
 		Acao acao = versaoJogo.acoes(respostaAcao, baralho);
 		
@@ -117,21 +121,39 @@ public class JogoController {
 		if (acao.podeSerContestada() || acao.podeSerbloqueado()) {
 			contexto.setEstado(new AguardandoRespostaAcao(contexto));
 			
+			List<CompletableFuture<Void>> futuros = new ArrayList<>();
+
 			for (Jogador outro : jogadoresAtivosLista) {
-				if (outro.equals(jogadorAtual) || !outro.isStatusAtivo()) continue;
-				
-				int resposta = view.perguntarRespostaAcao(outro, null, jogadoresAtivosLista, acao.podeSerContestada(), acao.podeSerbloqueado());
-				
-				if (resposta == 1 || resposta == 3) {
-					if (resposta == 1) view.mostrarLog(outro.getNome() + " CONTESTOU a ação!");
-					if (resposta == 3) view.mostrarLog(outro.getNome() + " BLOQUEOU a ação!");
-					contexto.getEstado().responderAcao(outro, resposta);
-					break;
-				} else {
-					view.mostrarLog(outro.getNome() + " aceitou.");
-					contexto.getEstado().responderAcao(outro, resposta);
-				}
+			    if (outro.equals(jogadorAtual) || !outro.isStatusAtivo()) continue;
+
+			    CompletableFuture<Void> futuro = CompletableFuture.runAsync(() -> {
+			        int resposta = view.perguntarRespostaAcao(outro, null, jogadoresAtivosLista, acao.podeSerContestada(), acao.podeSerbloqueado());
+			        
+			        synchronized (contexto) { // Sincroniza para evitar condições de corrida no estado
+			            // Só computa se o estado ainda for AguardandoRespostaAcao
+			            // Se alguém já contestou, o estado muda e os outros aceites são ignorados
+			            if (contexto.getEstado() instanceof AguardandoRespostaAcao) {
+			                if (resposta == 1 || resposta == 3) {
+			                    if (resposta == 1) view.mostrarLog(outro.getNome() + " CONTESTOU a ação!");
+			                    if (resposta == 3) view.mostrarLog(outro.getNome() + " BLOQUEOU a ação!");
+			                    contexto.getEstado().responderAcao(outro, resposta);
+			                } else {
+			                    view.mostrarLog(outro.getNome() + " aceitou.");
+			                    contexto.getEstado().responderAcao(outro, resposta);
+			                }
+			            }
+			        }
+			    });
+			    futuros.add(futuro);
 			}
+
+			// Bloqueia o loop principal até que todos tenham respondido
+			CompletableFuture.allOf(futuros.toArray(new CompletableFuture[0])).join();
+			if (contexto.getEstado() instanceof coup.estadoJogo.ResolvendoContestacao) {
+			    ((coup.estadoJogo.ResolvendoContestacao) contexto.getEstado()).resolverContestacao();
+			}
+
+			// 3. Resolve os desfechos pendentes na View...
 		} else {
 			// Ações inquestionáveis (Renda, Golpe de Estado)
 			acao.executar(jogadorAtual, contexto.getJogadorAlvo());
