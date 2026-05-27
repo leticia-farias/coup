@@ -73,13 +73,13 @@ public class Console implements IJogoView {
     }
 
     @Override
-    public int perguntarAcao(Jogador jogador, List<Jogador> jogadoresLista) {
+    public int perguntarAcao(Jogador jogador) {
         separarMensagens();
 
         int saldoJogador = jogador.getSaldo();
 
         if (saldoJogador >= 10) {
-            informarGolpe(jogador, jogadoresLista);
+            informarGolpe(jogador);
             return 7;
         }
 
@@ -100,7 +100,8 @@ public class Console implements IJogoView {
         System.out.println(jogador.getNome() + ", digite o número da ação:");
         return lerInteiro();
     }
-//
+
+    @Override
     public int perguntarRespostaAcao(
             Jogador jogadorAutor,
             Personagem supostoPersonagem,
@@ -229,7 +230,7 @@ public class Console implements IJogoView {
         }
     }
 
-    public void informarGolpe(Jogador jogadorAtual, List<Jogador> jogadoresLista) {
+    public void informarGolpe(Jogador jogadorAtual) {
         separarMensagens();
         System.out.println(jogadorAtual.getNome() + " é obrigado a fazer golpe de estado.");
     }
@@ -299,6 +300,41 @@ public class Console implements IJogoView {
 	public void mostrarLog() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public int perguntarModo() {
+		System.out.println("Qual será o modo de jogo?");		
+		System.out.println("1 - Original (com embaixador)");		
+		System.out.println("2 - Com inquisidor");
+		
+		return lerInteiro();
+	}
+	
+	@Override
+	public int perguntarOpcaoHerença() {
+		System.out.println("Habilitar herança?");		
+		System.out.println("1 - SIM");		
+		System.out.println("2 - NAO");		
+
+		return lerInteiro();
+	} // trocar para boolean
+	
+	@Override
+	public Carta pedirCartaParaDescarte(Jogador jogador) {
+	    separarMensagens();
+	    System.out.println(jogador.getNome() + ", escolha uma carta para perder:");
+	    mostrarCartas(jogador);
+	    
+	    int index = lerInteiro();
+	    // Verifica se a carta é válida e retorna a carta.
+	    return jogador.getJogadorCartas().getCartas().get(index);
+	}
+
+	@Override
+	public Carta pedirDescarteEmbaixador(Jogador jogador) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }   
