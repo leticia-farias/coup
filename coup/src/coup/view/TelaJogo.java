@@ -1,4 +1,4 @@
-package coup.ui;
+package coup.view;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;

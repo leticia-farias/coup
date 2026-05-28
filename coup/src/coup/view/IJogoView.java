@@ -31,4 +31,6 @@ public interface IJogoView {
 	public int perguntarOpcaoHerença();
 	public Carta pedirDescarteEmbaixador(Jogador jogador);
 	public Carta pedirCartaParaDescarte(Jogador jogador);
+	
+	public void mostrarSaldos(List<Jogador> jogadoresList);
 }

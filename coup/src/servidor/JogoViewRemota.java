@@ -153,10 +153,10 @@ public class JogoViewRemota implements IJogoView {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
-	public void mostrarLog() {
-		// TODO Auto-generated method stub
-		
+	public coup.model.Carta pedirDescarteEmbaixador(Jogador jogador) {
+	    // TODO: Implementar a chamada RMI para o Embaixador futuramente
+	    return null;
 	}
 }

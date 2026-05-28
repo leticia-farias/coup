@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import coup.acoes.Acao;
-import coup.acoes.FactoryVersaoInquisidor;
-import coup.acoes.FactoryVersaoOriginal;
 import coup.estadoJogo.AguardandoAcao;
 import coup.estadoJogo.AguardandoDescarte;
 import coup.estadoJogo.AguardandoRespostaAcao;
 import coup.estadoJogo.ContextoJogo;
+import coup.factory.FactoryVersaoInquisidor;
+import coup.factory.FactoryVersaoOriginal;
 import coup.factory.IJogoFactory;
 import coup.model.Baralho;
 import coup.model.Carta;

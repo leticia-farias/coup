@@ -1,6 +1,13 @@
-package coup.acoes;
+package coup.factory;
 
-import coup.factory.IJogoFactory;
+import coup.acoes.Acao;
+import coup.acoes.Ajudar;
+import coup.acoes.Assassinar;
+import coup.acoes.Capitar;
+import coup.acoes.Ducar;
+import coup.acoes.Embaixadar;
+import coup.acoes.Golpear;
+import coup.acoes.Receitar;
 import coup.model.Baralho;
 
 public class FactoryVersaoOriginal implements IJogoFactory {

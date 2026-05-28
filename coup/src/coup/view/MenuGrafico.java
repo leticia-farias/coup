@@ -1,4 +1,4 @@
-package coup.ui;
+package coup.view;
 
 import java.util.List;
 
