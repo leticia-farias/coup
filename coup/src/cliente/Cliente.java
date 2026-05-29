@@ -1,153 +1,132 @@
 package cliente;
 
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-import java.util.Scanner;
-
-import servidor.IJogoServidor;
+import javax.swing.JOptionPane;
+import coup.view.TelaJogo;
 
 public class Cliente extends UnicastRemoteObject implements IClient {
 
-    private transient Scanner sc = new Scanner(System.in);
+    private transient TelaJogo tela;
+    private String meuNome;
 
-    public Cliente() throws RemoteException {
+    public Cliente(TelaJogo tela, String meuNome) throws RemoteException {
         super();
+        this.tela = tela;
+        this.meuNome = meuNome;
     }
 
     @Override
     public void receberLog(String mensagem) throws RemoteException {
-        System.out.println("\n[SERVIDOR]: " + mensagem);
-    }
-
-    @Override
-    public int pedirModoJogo() throws RemoteException {
-        System.out.println("\n Você é o Host da partida! Qual versão deseja jogar?"); //TODO: refatorar para n ser o host a escolher a  versão 
-        System.out.println("1 - Original (com Embaixador)");
-        System.out.println("2 - Expansão (com Inquisidor)");
-        System.out.print("Sua escolha: ");
-        return sc.nextInt();
+        tela.adicionarLog(mensagem); 
     }
 
     @Override
     public int pedirAcao(String nome, int saldo) throws RemoteException {
-        System.out.println("\n----------------------------------");
-        System.out.println("Sua vez, " + nome + "! (Saldo: " + saldo + " moedas)");
-        System.out.println("1 - Imposto (Duque)");
-        System.out.println("2 - Roubar (Capitão)");
-        System.out.println("3 - Trocar (Embaixador/Inquisidor)");
-        System.out.println("4 - Ajuda externa");
-        System.out.println("5 - Pedir renda");
-        if (saldo >= 3) System.out.println("6 - Assassinar (Assassino)");
-        if (saldo >= 7) System.out.println("7 - Golpe de estado");
+        String[] opcoes = {"1 - Imposto (Duque)", "2 - Roubar (Capitão)", "3 - Trocar (Emb/Inq)", "4 - Ajuda externa", "5 - Pedir renda", "6 - Assassinar", "7 - Golpe de estado"};
         
-        System.out.print("Escolha sua ação: ");
-        return sc.nextInt();
+        String escolhaStr = (String) JOptionPane.showInputDialog(tela,
+                "Sua vez, " + nome + "! (Saldo: " + saldo + " moedas)\nEscolha sua ação:",
+                "Ação de " + nome, JOptionPane.QUESTION_MESSAGE, null, opcoes, opcoes[0]);
+
+        if (escolhaStr == null) return 5; 
+        return Integer.parseInt(escolhaStr.substring(0, 1));
     }
 
     @Override
     public int pedirHabilidadeInquisidor() throws RemoteException {
-        System.out.println("\n[INQUISIDOR] Qual habilidade deseja usar?");
-        System.out.println("1 - Trocar 1 carta com o baralho");
-        System.out.println("2 - Espionar a carta de um jogador");
-        System.out.print("Sua escolha: ");
-        return sc.nextInt();
+        String[] opcoes = {"1 - Trocar 1 carta com o baralho", "2 - Espionar a carta de um jogador"};
+        String escolhaStr = (String) JOptionPane.showInputDialog(tela,
+                "[INQUISIDOR] Qual habilidade deseja usar?",
+                "Habilidade do Inquisidor", JOptionPane.QUESTION_MESSAGE, null, opcoes, opcoes[0]);
+                
+        if (escolhaStr == null) return 1;
+        return Integer.parseInt(escolhaStr.substring(0, 1));
     }
 
     @Override
     public String pedirAlvo(String nome, List<String> possiveisAlvos) throws RemoteException {
-        System.out.println("\nEscolha um alvo:");
-        for (int i = 0; i < possiveisAlvos.size(); i++) {
-            System.out.println((i + 1) + " - " + possiveisAlvos.get(i));
-        }
-        System.out.print("Digite o número do alvo: ");
-        int escolha = sc.nextInt();
-        // Retorna o nome da string correspondente (ajustando o índice -1)
-        return possiveisAlvos.get(escolha - 1);
+        String alvoStr = (String) JOptionPane.showInputDialog(tela,
+                "Escolha um alvo para a sua ação:",
+                "Seleção de Alvo", JOptionPane.QUESTION_MESSAGE, null, possiveisAlvos.toArray(), possiveisAlvos.get(0));
+                
+        return alvoStr != null ? alvoStr : possiveisAlvos.get(0);
     }
 
     @Override
     public int pedirRespostaReacao(String autor, boolean podeContestar, boolean podeBloquear) throws RemoteException {
-        System.out.println("\n[Ação de " + autor + "] Como deseja responder?");
-        if (podeContestar) System.out.println("1 - Contestar");
-        System.out.println("2 - Aceitar");
-        if (podeBloquear) System.out.println("3 - Bloquear");
-        
-        System.out.print("Sua escolha: ");
-        return sc.nextInt();
+        String[] opcoes;
+        if (podeContestar && podeBloquear) opcoes = new String[]{"1 - Contestar", "2 - Aceitar", "3 - Bloquear"};
+        else if (podeContestar) opcoes = new String[]{"1 - Contestar", "2 - Aceitar"};
+        else if (podeBloquear) opcoes = new String[]{"2 - Aceitar", "3 - Bloquear"};
+        else opcoes = new String[]{"2 - Aceitar"};
+
+        String escolhaStr = (String) JOptionPane.showInputDialog(tela,
+                "[Ação de " + autor + "] Como deseja responder?",
+                "Reação", JOptionPane.QUESTION_MESSAGE, null, opcoes, "2 - Aceitar");
+                
+        if (escolhaStr == null) return 2;
+        return Integer.parseInt(escolhaStr.substring(0, 1));
     }
 
     @Override
     public void mostrarSaldos(List<String> saldos) throws RemoteException {
-        System.out.println("\n--- SALDO DOS JOGADORES ---");
+        StringBuilder sb = new StringBuilder("\n--- STATUS DA MESA ---\n");
         for (String s : saldos) {
-            System.out.println(s);
+            sb.append(s).append("\n");
         }
-        System.out.println("---------------------------");
+        tela.adicionarLog(sb.toString());
+        
+        // Manda os dados para a tela desenhar as cartas dos oponentes
+        tela.atualizarMesa(saldos, meuNome); 
     }
     
     @Override
     public int pedirDescarte(String nome, List<String> cartasAtivas) throws RemoteException {
-        System.out.println("\n[AÇÃO DE DESCARTE] " + nome + ", escolha uma carta para descartar/devolver:");
-        for (int i = 0; i < cartasAtivas.size(); i++) {
-            System.out.println((i + 1) + " - " + cartasAtivas.get(i));
-        }
-        System.out.print("Digite o número da carta: ");
-        return sc.nextInt() - 1; // Retorna o índice (0 ou 1) para o servidor
+        String escolhaStr = (String) JOptionPane.showInputDialog(tela,
+                "[DESCARTE] " + nome + ", escolha uma carta para descartar/devolver:",
+                "Descarte de Carta", JOptionPane.WARNING_MESSAGE, null, cartasAtivas.toArray(), cartasAtivas.get(0));
+                
+        if (escolhaStr == null) return 0;
+        return cartasAtivas.indexOf(escolhaStr);
     }
 
-    //metodos do inquisidor 
     @Override
     public int pedirCartaParaMostrar(String nome, List<String> cartasAtivas) throws RemoteException {
-        System.out.println("\n[INQUISIDOR] " + nome + ", você está sendo espionado! Escolha UMA carta para mostrar:");
-        for (int i = 0; i < cartasAtivas.size(); i++) {
-            System.out.println((i + 1) + " - " + cartasAtivas.get(i));
-        }
-        System.out.print("Digite o número da carta: ");
-        return sc.nextInt() - 1;
+        String escolhaStr = (String) JOptionPane.showInputDialog(tela,
+                "[INQUISIDOR] Você está sendo espionado! Escolha UMA carta para mostrar:",
+                "Espionagem", JOptionPane.WARNING_MESSAGE, null, cartasAtivas.toArray(), cartasAtivas.get(0));
+                
+        if (escolhaStr == null) return 0;
+        return cartasAtivas.indexOf(escolhaStr);
     }
 
     @Override
     public int decidirDestinoCartaEspionada(String nomeInquisidor, String cartaMostrada) throws RemoteException {
-        System.out.println("\n[DECISÃO DO INQUISIDOR] O alvo te mostrou a carta: " + cartaMostrada);
-        System.out.println("O que você deseja fazer?");
-        System.out.println("1 - Forçar o alvo a trocar esta carta com o baralho");
-        System.out.println("2 - Deixar o alvo manter a carta");
-        System.out.print("Sua escolha: ");
-        return sc.nextInt();
+        String[] opcoes = {"1 - Forçar troca com o baralho", "2 - Deixar o alvo manter a carta"};
+        String escolhaStr = (String) JOptionPane.showInputDialog(tela,
+                "O alvo te mostrou a carta: " + cartaMostrada + "\nO que você deseja fazer?",
+                "Decisão do Inquisidor", JOptionPane.QUESTION_MESSAGE, null, opcoes, opcoes[0]);
+                
+        if (escolhaStr == null) return 2;
+        return Integer.parseInt(escolhaStr.substring(0, 1));
     }
 
-    //TODO: refatorar para não utilizar o suppres warnings
-    @SuppressWarnings("resource") // reselve o alerta do scanner never closed
-    public static void main(String[] args) {
-        try {
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Digite seu nome para entrar na partida: ");
-            String nome = scanner.nextLine();
-
-            // Conecta ao RMI Registry na porta padrão (1099) no localhost
-            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
-            IJogoServidor servidor = (IJogoServidor) registry.lookup("CoupServidor");
-
-            Cliente cliente = new Cliente();
-            servidor.entrarJogo(cliente, nome);
-
-            System.out.println("Conectado! Aguardando o lobby encher...");
-
-        } catch (Exception e) {
-            System.err.println("Erro ao conectar no servidor: " + e.getMessage());
-            e.printStackTrace();
-        }
+    @Override
+    public int pedirModoJogo() throws RemoteException {
+        String[] opcoes = {"1 - Original (com Embaixador)", "2 - Expansão (com Inquisidor)"};
+        String escolhaStr = (String) JOptionPane.showInputDialog(tela,
+                "Você é o Host! Qual versão deseja jogar?",
+                "Configuração da Partida", JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0]);
+                
+        if (escolhaStr == null) return 1;
+        return Integer.parseInt(escolhaStr.substring(0, 1));
     }
 
     @Override
     public void mostrarSuasCartas(List<String> cartas) throws RemoteException {
-        System.out.println("\n--- SUAS CARTAS ---");
-        for (String c : cartas) {
-            System.out.println("- " + c);
-        }
-        System.out.println("-------------------");
+        // Manda a tela desenhar suas cartas na parte inferior
+        tela.atualizarSuasCartas(cartas); 
     }
 }
