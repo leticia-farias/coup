@@ -4,12 +4,12 @@ public class MascoteTradutor {
 
     public static String getNomeMascote(PersonagensNomes personagem) {
         switch (personagem) {
-            case DUQUE:      return "Java Duke";
-            case ASSASSINO:  return "Kali";
-            case CAPITAO:    return "Elefante";
-            case EMBAIXADOR: return "Droid";
-            case CONDESSA:   return "Ferris";
-            case INQUISIDOR: return "Octo";
+            case DUQUE:      return "Duke (Java)";
+            case ASSASSINO:  return "Kali (Distro Linux)";
+            case CAPITAO:    return "Elefante (PostgreSQL)";
+            case EMBAIXADOR: return "Droid (Android)";
+            case CONDESSA:   return "Ferris (Rust)";
+            case INQUISIDOR: return "Octo (Git/Github)";
             default:         return personagem.name();
         }
     }
