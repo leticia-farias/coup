@@ -78,11 +78,6 @@ public class Console implements IJogoView {
 
 		int saldoJogador = jogador.getSaldo();
 
-		if (saldoJogador >= 10) {
-			informarGolpe(jogador);
-			return 7;
-		}
-
 		System.out.println("1 - Imposto (Duque)");
 		System.out.println("2 - Roubar (Capitão)");
 		System.out.println("3 - Trocar (Embaixador)");
