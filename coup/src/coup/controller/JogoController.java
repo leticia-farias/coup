@@ -101,6 +101,10 @@ public class JogoController {
 	}
 	
 private void processarTurno(Jogador jogadorAtual) {
+        // Adiciona um cabeçalho claro indicando o início do turno do jogador
+       /*  view.mostrarLog("\n=============================================");
+        view.mostrarLog("TURNO ATUAL: " + jogadorAtual.getNome().toUpperCase());*/
+
         // 1. Inicializa o contexto (agora com o baralho)
         if (this.contexto == null) {
             this.contexto = new ContextoJogo(null, jogadorAtual, baralho);
@@ -117,10 +121,18 @@ private void processarTurno(Jogador jogadorAtual) {
         // 3. Determina a ação respeitando a regra de 10 moedas obrigatórias
         int respostaAcao;
         if (jogadorAtual.getSaldo() >= 10) {
-            view.mostrarLog("\n🚨 OBRIGATÓRIO! " + jogadorAtual.getNome() + " acumulou " + jogadorAtual.getSaldo() + " moedas e DEVE realizar um Golpe de Estado!");
+            view.mostrarLog("\n[OBRIGATORIO] " + jogadorAtual.getNome() + " acumulou " + jogadorAtual.getSaldo() + " moedas e DEVE realizar um Golpe de Estado!");
             respostaAcao = 7; 
         } else {
             respostaAcao = view.perguntarAcao(jogadorAtual);
+        }
+        
+        // Se for a versão Inquisidor e a opção for 3, abre o sub-menu
+        if (respostaAcao == 3 && versaoJogo instanceof coup.factory.FactoryVersaoInquisidor) {
+            int subEscolha = view.pedirHabilidadeInquisidor(jogadorAtual);
+            if (subEscolha == 2) {
+                respostaAcao = 8; // Converte para o Case 8 internamente (Espionar)
+            }
         }
         
         Acao acao = versaoJogo.acoes(respostaAcao, baralho);
@@ -132,8 +144,29 @@ private void processarTurno(Jogador jogadorAtual) {
             jogadorAtual.setSaldo(jogadorAtual.getSaldo() - 7);
         }
 
-        // 5. Avisa os clientes e define o alvo
-        view.mostrarLog("\n>>> O jogador " + jogadorAtual.getNome() + " iniciou a ação: " + acao.getClass().getSimpleName().toUpperCase());
+        // 5. Formata o nome da ação para exibição amigável no console
+        String nomeAcaoExibicao = acao.getClass().getSimpleName();
+        if (nomeAcaoExibicao.equalsIgnoreCase("InquisidarTrocar")) {
+            nomeAcaoExibicao = "Inquisidor (Trocar Carta)";
+        } else if (nomeAcaoExibicao.equalsIgnoreCase("InquisidarEspionar")) {
+            nomeAcaoExibicao = "Inquisidor (Espionar Alvo)";
+        } else if (nomeAcaoExibicao.equalsIgnoreCase("Embaixadar")) {
+            nomeAcaoExibicao = "Embaixador";
+        } else if (nomeAcaoExibicao.equalsIgnoreCase("Ducar")) {
+            nomeAcaoExibicao = "Duque (Imposto)";
+        } else if (nomeAcaoExibicao.equalsIgnoreCase("Capitar")) {
+            nomeAcaoExibicao = "Capitão (Roubar)";
+        } else if (nomeAcaoExibicao.equalsIgnoreCase("Receitar")) {
+            nomeAcaoExibicao = "Pedir Renda";
+        } else if (nomeAcaoExibicao.equalsIgnoreCase("Assassinar")) {
+            nomeAcaoExibicao = "Assassinar";
+        } else if (nomeAcaoExibicao.equalsIgnoreCase("Golpear")) {
+            nomeAcaoExibicao = "Golpe de Estado";
+        } else if (nomeAcaoExibicao.equalsIgnoreCase("Ajudar")) {
+            nomeAcaoExibicao = "Ajuda Externa";
+        }
+
+        view.mostrarLog("\n>>> O jogador " + jogadorAtual.getNome() + " iniciou a ação: " + nomeAcaoExibicao.toUpperCase());
         
         contexto.setAcaoPendente(acao);
 
@@ -171,27 +204,25 @@ private void processarTurno(Jogador jogadorAtual) {
             }
 
             CompletableFuture.allOf(futuros.toArray(new CompletableFuture[0])).join();
+            
             // Resolve se alguém BLOQUEOU a ação original
             if (contexto.getEstado() instanceof coup.estadoJogo.AguardandoRespostaBloqueio) {
                 coup.estadoJogo.AguardandoRespostaBloqueio estadoBloqueio = (coup.estadoJogo.AguardandoRespostaBloqueio) contexto.getEstado();
                 
-                view.mostrarLog("A ação foi BLOQUEADA!");
+                view.mostrarLog("[AVISO] A ação foi BLOQUEADA!");
                 
-                // Pergunta ao autor da ação se ele quer contestar o bloqueio (ex: duvidar da Condessa do alvo)
-                // Usamos o jogadorAutor do contexto
                 int respostaAoBloqueio = view.perguntarRespostaAcao(contexto.getJogadorAutor(), null, jogadoresAtivosLista, true, false);
                 
-                if (respostaAoBloqueio == 1) { // 1 = Contestar o bloqueio
+                if (respostaAoBloqueio == 1) { 
                     view.mostrarLog(contexto.getJogadorAutor().getNome() + " DUVIDOU do bloqueio!");
                     estadoBloqueio.responderAcao(contexto.getJogadorAutor(), 1);
                     
-                    // Como virou uma contestação, precisamos resolver para ver quem perde a carta
                     if (contexto.getEstado() instanceof coup.estadoJogo.ResolvendoContestacao) {
                         ((coup.estadoJogo.ResolvendoContestacao) contexto.getEstado()).resolverContestacao();
                     }
                 } else {
                     view.mostrarLog(contexto.getJogadorAutor().getNome() + " aceitou o bloqueio. A ação falhou.");
-                    estadoBloqueio.responderAcao(contexto.getJogadorAutor(), 2); // 2 = Aceitar
+                    estadoBloqueio.responderAcao(contexto.getJogadorAutor(), 2); 
                 }
             }
 
@@ -206,16 +237,45 @@ private void processarTurno(Jogador jogadorAtual) {
             }
         }
 
-        // 7. Resolve os desfechos pendentes na View (Ex: Descarte ou Troca do Embaixador)
+        // 7. Resolve os desfechos pendentes na View (Ex: Descarte ou Troca do Embaixador/Inquisidor)
         if (acao.getClass().getSimpleName().equals("Embaixadar") && contexto.getEstado() instanceof coup.estadoJogo.AguardandoTrocaEmbaixador) {
             coup.estadoJogo.AguardandoTrocaEmbaixador estadoTroca = (coup.estadoJogo.AguardandoTrocaEmbaixador) contexto.getEstado();
             
             for (int i = 0; i < 2; i++) {
-                view.mostrarLog("\n[EMBAIXADOR] " + jogadorAtual.getNome() + ", escolha a " + (i + 1) + "ª carta para DEVOLVER ao baralho:");
+                view.mostrarLog("\n[EMBAIXADOR] " + jogadorAtual.getNome() + ", escolha a " + (i + 1) + " a carta para DEVOLVER au baralho:");
                 coup.model.Carta cartaDevolvida = view.pedirCartaParaDescarte(jogadorAtual);
                 estadoTroca.descartarCarta(cartaDevolvida); 
             }
-            view.mostrarLog(jogadorAtual.getNome() + " devolveu as cartas excedentes ao baralho.");
+            view.mostrarLog("[INFO] " + jogadorAtual.getNome() + " devolveu as cartas excedentes ao baralho.");
+        }
+        
+        // RESOLVE: TROCA DO INQUISIDOR
+        if (acao.getClass().getSimpleName().equals("InquisidarTrocar")) {
+            view.mostrarLog("\n[INQUISIDOR] " + jogadorAtual.getNome() + " comprou 1 carta e vai escolher 1 para devolver...");
+            coup.model.Carta cartaDevolvida = view.pedirCartaParaDescarte(jogadorAtual); 
+            jogadorAtual.getJogadorCartas().getCartas().remove(cartaDevolvida);
+            baralho.devolverCarta(cartaDevolvida);
+            view.mostrarLog("[INFO] " + jogadorAtual.getNome() + " devolveu a carta ao baralho.");
+        }
+
+        // RESOLVE: ESPIONAGEM DO INQUISIDOR
+        if (acao.getClass().getSimpleName().equals("InquisidarEspionar")) {
+            Jogador alvo = contexto.getJogadorAlvo();
+            view.mostrarLog("\n[INQUISIDOR] " + jogadorAtual.getNome() + " está examinando uma carta de " + alvo.getNome() + "!");
+
+            coup.model.Carta cartaMostrada = view.pedirCartaParaMostrar(alvo);
+            view.mostrarLog("[INFO] " + alvo.getNome() + " mostrou uma carta para o Inquisidor em segredo.");
+            
+            boolean forcarTroca = view.decidirTrocaInquisidor(jogadorAtual, cartaMostrada);
+            
+            if (forcarTroca) {
+                view.mostrarLog("[AÇÃO] O Inquisidor FORÇOU " + alvo.getNome() + " a trocar a carta com o baralho!");
+                alvo.getJogadorCartas().getCartas().remove(cartaMostrada);
+                baralho.devolverCarta(cartaMostrada);
+                alvo.getJogadorCartas().getCartas().add(baralho.comprarCarta());
+            } else {
+                view.mostrarLog("[AÇÃO] O Inquisidor permitiu que " + alvo.getNome() + " mantivesse a carta.");
+            }
         }
         
         if (contexto.getEstado() instanceof AguardandoDescarte) {
@@ -223,11 +283,11 @@ private void processarTurno(Jogador jogadorAtual) {
             Jogador perdedor = estadoDescarte.getJogadorQueDescarta();
             
             if (perdedor != null && perdedor.isStatusAtivo()) {
-                view.mostrarLog(perdedor.getNome() + " deve descartar uma carta para a mesa!");
+                view.mostrarLog("\n[DESCARTE] " + perdedor.getNome() + " deve descartar uma carta para a mesa!");
                 coup.model.Carta cartaMorta = view.pedirCartaParaDescarte(perdedor);
                 
                 estadoDescarte.descartarCarta(cartaMorta);
-                view.mostrarLog( perdedor.getNome() + " revelou e PERDEU a influência de: " + cartaMorta.getPersonagem().getNome());
+                view.mostrarLog("[INFO] " + perdedor.getNome() + " revelou e PERDEU a influência de: " + cartaMorta.getPersonagem().getNome());
             }
         }
         
@@ -235,6 +295,6 @@ private void processarTurno(Jogador jogadorAtual) {
         view.mostrarLog("Ação Finalizada com sucesso!");
         view.mostrarSaldos(jogadoresAtivosLista);
         view.mostrarLog("=============================================\n");
-    }
+}
 	
 }

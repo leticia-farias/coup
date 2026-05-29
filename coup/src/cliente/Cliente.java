@@ -23,6 +23,15 @@ public class Cliente extends UnicastRemoteObject implements IClient {
     }
 
     @Override
+    public int pedirModoJogo() throws RemoteException {
+        System.out.println("\n Você é o Host da partida! Qual versão deseja jogar?"); //TODO: refatorar para n ser o host a escolher a  versão 
+        System.out.println("1 - Original (com Embaixador)");
+        System.out.println("2 - Expansão (com Inquisidor)");
+        System.out.print("Sua escolha: ");
+        return sc.nextInt();
+    }
+
+    @Override
     public int pedirAcao(String nome, int saldo) throws RemoteException {
         System.out.println("\n----------------------------------");
         System.out.println("Sua vez, " + nome + "! (Saldo: " + saldo + " moedas)");
@@ -81,7 +90,7 @@ public class Cliente extends UnicastRemoteObject implements IClient {
     
     @Override
     public int pedirDescarte(String nome, List<String> cartasAtivas) throws RemoteException {
-        System.out.println("\n[URGENTE] " + nome + ", perdeu uma vida! Escolha uma carta para descartar:");
+        System.out.println("\n[AÇÃO DE DESCARTE] " + nome + ", escolha uma carta para descartar/devolver:");
         for (int i = 0; i < cartasAtivas.size(); i++) {
             System.out.println((i + 1) + " - " + cartasAtivas.get(i));
         }
