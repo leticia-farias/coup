@@ -2,6 +2,7 @@ package cliente;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import coup.view.TelaJogo;
@@ -22,15 +23,25 @@ public class Cliente extends UnicastRemoteObject implements IClient {
         tela.adicionarLog(mensagem); 
     }
 
-    @Override
+@Override
     public int pedirAcao(String nome, int saldo) throws RemoteException {
-        String[] opcoes = {"1 - Imposto (Duque)", "2 - Roubar (Capitão)", "3 - Trocar (Emb/Inq)", "4 - Ajuda externa", "5 - Pedir renda", "6 - Assassinar", "7 - Golpe de estado"};
+        // Mapeamento dos nomes na Lore TechSphere
+        String[] opcoes = {
+            "1 - Coletar Royalties (Java Duke)", 
+            "2 - Extorquir (Elefante)", 
+            "3 - Gerenciar Identidades (Droid/Octo)", 
+            "4 - Ajuda externa", 
+            "5 - Pedir renda", 
+            "6 - Executar (Kali)", 
+            "7 - Golpe de estado"
+        };
         
         String escolhaStr = (String) JOptionPane.showInputDialog(tela,
                 "Sua vez, " + nome + "! (Saldo: " + saldo + " moedas)\nEscolha sua ação:",
                 "Ação de " + nome, JOptionPane.QUESTION_MESSAGE, null, opcoes, opcoes[0]);
 
         if (escolhaStr == null) return 5; 
+        // O parseInt ainda funciona porque mantivemos o número no início da string (ex: "1 - ...")
         return Integer.parseInt(escolhaStr.substring(0, 1));
     }
 
@@ -113,20 +124,36 @@ public class Cliente extends UnicastRemoteObject implements IClient {
         return Integer.parseInt(escolhaStr.substring(0, 1));
     }
 
-    @Override
+@Override
     public int pedirModoJogo() throws RemoteException {
-        String[] opcoes = {"1 - Original (com Embaixador)", "2 - Expansão (com Inquisidor)"};
+        String[] opcoes = {
+            "1 - Stack Legada (com Droid)", 
+            "2 - Stack Avançada (com Octo)"
+        };
+        
         String escolhaStr = (String) JOptionPane.showInputDialog(tela,
-                "Você é o Host! Qual versão deseja jogar?",
-                "Configuração da Partida", JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0]);
+                "Você é o Host! Qual arquitetura deseja carregar?",
+                "Configuração da Partida - TechSphere", 
+                JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0]);
                 
         if (escolhaStr == null) return 1;
         return Integer.parseInt(escolhaStr.substring(0, 1));
     }
 
+    private List<String> minhasCartasAtuais = new ArrayList<>();
+    
     @Override
     public void mostrarSuasCartas(List<String> cartas) throws RemoteException {
         // Manda a tela desenhar suas cartas na parte inferior
+        this.minhasCartasAtuais = cartas;
         tela.atualizarSuasCartas(cartas); 
+    }
+
+    @Override
+    public void sincronizarEstado() throws RemoteException {
+        // Isso força a tela a redesenhar as cartas que o cliente já possui em memória
+        if (!minhasCartasAtuais.isEmpty()) {
+            tela.atualizarSuasCartas(minhasCartasAtuais);
+        }
     }
 }

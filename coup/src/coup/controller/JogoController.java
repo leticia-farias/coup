@@ -88,6 +88,10 @@ public class JogoController {
 		return (int) jogadoresAtivosLista.stream().filter(Jogador::isStatusAtivo).count();
 	}
 
+	public List<Jogador> getListaJogadores() {
+        return this.jogadoresAtivosLista;
+    }
+
 	//loop que ignora os jogadores mortos 
 	private void iniciarProximoTurno() {
 		Jogador jogadorAtual;
@@ -295,6 +299,7 @@ private void processarTurno(Jogador jogadorAtual) {
         view.mostrarLog("Ação Finalizada com sucesso!");
         view.mostrarSaldos(jogadoresAtivosLista);
         view.mostrarLog("=============================================\n");
-}
+
+	}
 	
 }

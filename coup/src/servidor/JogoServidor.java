@@ -35,6 +35,11 @@ public class JogoServidor extends UnicastRemoteObject implements IJogoServidor {
                 viewRemota.mostrarLog("Lobby cheio! Iniciando a partida...");
                 JogoController controller = new JogoController(viewRemota);
                 controller.prepararJogo();
+                
+                // Força a sincronização inicial de cartas para todos os clientes
+                // Agora delegamos essa responsabilidade para a viewRemota
+                viewRemota.sincronizarCartasIniciais(controller.getListaJogadores());
+                
                 controller.iniciarPartida();
             }).start();
         }

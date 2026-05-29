@@ -94,7 +94,7 @@ public class JogoViewRemota implements IJogoView {
             } catch (RemoteException ignored) {}
         }
     }
-	
+    
     // Métodos de configuração inicial podem ser fixados ou tratados no setup do Servidor
     @Override public int pedirQuantidadeJogadores() { return clientes.size(); }
     @Override public String pedirNomeJogador(int index) { return new ArrayList<>(clientes.keySet()).get(index); }
@@ -102,7 +102,7 @@ public class JogoViewRemota implements IJogoView {
     @Override public int perguntarOpcaoHerença() { return 2; }
     @Override public void mostrarCartas() {}
 
-	@Override 
+    @Override 
     public int perguntarModo() { 
         try {
             // Pega o primeiro jogador da lista (O Host que criou a sala)
@@ -249,5 +249,12 @@ public class JogoViewRemota implements IJogoView {
     public coup.model.Carta pedirDescarteEmbaixador(Jogador jogador) {
         // TODO: Implementar a chamada RMI para o Embaixador futuramente
         return null;
+    }
+
+    // Metodo que permite ao servidor varrer todos os jogadores e forçar o envio das cartas para cada um deles
+    public void sincronizarCartasIniciais(List<Jogador> todosJogadores) {
+        for (Jogador j : todosJogadores) {
+            enviarCartasParaJogador(j);
+        }
     }
 }

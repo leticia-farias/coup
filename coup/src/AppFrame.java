@@ -87,6 +87,12 @@ public class AppFrame extends JFrame {
             IJogoServidor servidor = (IJogoServidor) registry.lookup("CoupServidor");
             servidor.entrarJogo(cliente, nome);
 
+            telaJogo.adicionarLog("Você conectou como " + nome + ".");
+            telaJogo.adicionarLog("Aguardando outros jogadores...");
+            
+            // Força a sincronização inicial
+            cliente.sincronizarEstado();
+            
             // Sucesso: Configura a tela e fecha o Menu
             telaJogo.adicionarLog("Você conectou como " + nome + ".");
             telaJogo.adicionarLog("Aguardando outros jogadores...");

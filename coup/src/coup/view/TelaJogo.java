@@ -1,15 +1,20 @@
 package coup.view;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import coup.model.MascoteTradutor;
+import coup.model.PersonagensNomes;
 
 public class TelaJogo extends JFrame {
 
     private JPanel painelMesa;
     private JPanel painelJogador;
+    private JPanel painelSuasCartas;
     private JPanel painelSidebar;
     private JTextArea areaDeLog;
 
@@ -29,7 +34,7 @@ public class TelaJogo extends JFrame {
     }
 
     private void inicializarComponentes() {
-        // 1. Painel da Mesa (Oponentes)
+        // 1. Painel da Mesa (Onde ficam os adversários)
         painelMesa = new JPanel(new BorderLayout());
         painelMesa.setBackground(PaletaCoup.BG_DEEP);
         
@@ -39,27 +44,32 @@ public class TelaJogo extends JFrame {
         lblMesa.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         painelMesa.add(lblMesa, BorderLayout.NORTH);
 
-        // 2. Painel do Jogador (Parte inferior)
+        // 2. Painel do Jogador (Cartas e Ações na parte inferior)
         painelJogador = new JPanel(new BorderLayout());
         painelJogador.setBackground(PaletaCoup.BG_CARD);
         painelJogador.setBorder(new LineBorder(PaletaCoup.BORDER_DIM, 2));
         painelJogador.setPreferredSize(new Dimension(0, 200));
 
-        JLabel lblJogador = new JLabel("SUAS CARTAS E AÇÕES", SwingConstants.CENTER);
-        lblJogador.setForeground(PaletaCoup.GOLD_BRIGHT);
-        lblJogador.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        painelJogador.add(lblJogador, BorderLayout.NORTH);
+        painelSuasCartas = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
+        painelSuasCartas.setBackground(PaletaCoup.BG_CARD);
+        painelSuasCartas.setBorder(BorderFactory.createTitledBorder(
+                new LineBorder(PaletaCoup.GOLD_DIM, 1, true), "SUAS CARTAS",
+                TitledBorder.CENTER, TitledBorder.TOP, new Font("Arial", Font.BOLD, 12), PaletaCoup.GOLD_BRIGHT));
+        
+        painelJogador.add(painelSuasCartas, BorderLayout.CENTER);
 
-        // 3. Painel Lateral (Logs do Servidor)
+        // 3. Painel Lateral (Logs do Servidor e Histórico)
         painelSidebar = new JPanel(new BorderLayout());
         painelSidebar.setBackground(PaletaCoup.BG_SIDEBAR);
         painelSidebar.setBorder(new LineBorder(PaletaCoup.BORDER_DIM, 1));
         painelSidebar.setPreferredSize(new Dimension(300, 0));
 
+        JPanel containerLog = new JPanel(new BorderLayout());
+        containerLog.setBackground(PaletaCoup.BG_SIDEBAR);
         JLabel lblLog = new JLabel("HISTÓRICO DO JOGO", SwingConstants.CENTER);
         lblLog.setForeground(PaletaCoup.TEXT_MUTED);
         lblLog.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        painelSidebar.add(lblLog, BorderLayout.NORTH);
+        containerLog.add(lblLog, BorderLayout.NORTH);
 
         areaDeLog = new JTextArea();
         areaDeLog.setBackground(PaletaCoup.BG_SIDEBAR);
@@ -71,7 +81,25 @@ public class TelaJogo extends JFrame {
 
         JScrollPane scrollLog = new JScrollPane(areaDeLog);
         scrollLog.setBorder(null);
-        painelSidebar.add(scrollLog, BorderLayout.CENTER);
+        scrollLog.getViewport().setBackground(PaletaCoup.BG_SIDEBAR);
+        containerLog.add(scrollLog, BorderLayout.CENTER);
+
+        // 3.2 Cola de Personagens (Lore TechSphere)
+        JPanel painelCola = new JPanel(new GridLayout(6, 1));
+        painelCola.setBackground(PaletaCoup.BG_SIDEBAR);
+        painelCola.setBorder(BorderFactory.createTitledBorder(
+                new LineBorder(PaletaCoup.BORDER_DIM, 1, true), "PERSONAGENS",
+                TitledBorder.LEFT, TitledBorder.TOP, new Font("Arial", Font.BOLD, 10), PaletaCoup.GOLD_DIM));
+        
+        adicionarDicaPersonagem(painelCola, MascoteTradutor.getNomeMascote(PersonagensNomes.DUQUE), MascoteTradutor.getDescricao(PersonagensNomes.DUQUE));
+        adicionarDicaPersonagem(painelCola, MascoteTradutor.getNomeMascote(PersonagensNomes.ASSASSINO), MascoteTradutor.getDescricao(PersonagensNomes.ASSASSINO));
+        adicionarDicaPersonagem(painelCola, MascoteTradutor.getNomeMascote(PersonagensNomes.CAPITAO), MascoteTradutor.getDescricao(PersonagensNomes.CAPITAO));
+        adicionarDicaPersonagem(painelCola, MascoteTradutor.getNomeMascote(PersonagensNomes.EMBAIXADOR), MascoteTradutor.getDescricao(PersonagensNomes.EMBAIXADOR));
+        adicionarDicaPersonagem(painelCola, MascoteTradutor.getNomeMascote(PersonagensNomes.CONDESSA), MascoteTradutor.getDescricao(PersonagensNomes.CONDESSA));
+        adicionarDicaPersonagem(painelCola, MascoteTradutor.getNomeMascote(PersonagensNomes.INQUISIDOR), MascoteTradutor.getDescricao(PersonagensNomes.INQUISIDOR));
+
+        painelSidebar.add(containerLog, BorderLayout.CENTER);
+        painelSidebar.add(painelCola, BorderLayout.SOUTH);
     }
 
     private void montarLayout() {
@@ -80,6 +108,7 @@ public class TelaJogo extends JFrame {
         add(painelSidebar, BorderLayout.EAST);
     }
 
+    // MÉTODO: Permite que o Cliente escreva na barra lateral
     public void adicionarLog(String mensagem) {
         SwingUtilities.invokeLater(() -> {
             areaDeLog.append(mensagem + "\n");
@@ -88,29 +117,19 @@ public class TelaJogo extends JFrame {
     }
 
     // =========================================================================
-    // NOVOS MÉTODOS VISUAIS PARA DESENHAR AS CARTAS
+    // MÉTODOS VISUAIS PARA DESENHAR AS CARTAS
     // =========================================================================
 
     public void atualizarSuasCartas(List<String> cartasStr) {
         SwingUtilities.invokeLater(() -> {
-            // Remove as cartas antigas da área "Center" do painelJogador
-            BorderLayout layout = (BorderLayout) painelJogador.getLayout();
-            Component centerComponent = layout.getLayoutComponent(BorderLayout.CENTER);
-            if (centerComponent != null) painelJogador.remove(centerComponent);
-
-            // Cria um painel novo para enfileirar as cartas
-            JPanel painelCartas = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
-            painelCartas.setBackground(PaletaCoup.BG_CARD);
-
+            painelSuasCartas.removeAll();
             for (String c : cartasStr) {
                 boolean morta = c.contains("(Morta)");
                 String nomeCarta = c.replace(" (Ativa)", "").replace(" (Morta)", "").trim();
-                painelCartas.add(criarDesenhoCarta(nomeCarta, morta, true));
+                painelSuasCartas.add(criarDesenhoCarta(nomeCarta, morta, true));
             }
-
-            painelJogador.add(painelCartas, BorderLayout.CENTER);
-            painelJogador.revalidate();
-            painelJogador.repaint();
+            painelSuasCartas.revalidate();
+            painelSuasCartas.repaint();
         });
     }
 
@@ -124,12 +143,8 @@ public class TelaJogo extends JFrame {
             painelOponentes.setBackground(PaletaCoup.BG_DEEP);
 
             for (String s : statusSaldos) {
-                // Parse rudimentar da string do servidor para extrair dados
                 String[] partes = s.split(":");
-                if (partes.length < 2) continue;
-                String nomeOp = partes[0].trim();
-                
-                if (nomeOp.equalsIgnoreCase(meuNome)) continue; // Não desenha você mesmo na mesa central
+                if (partes.length < 2 || partes[0].trim().equalsIgnoreCase(meuNome)) continue;
 
                 boolean eliminado = s.contains("(ELIMINADO)");
                 String textoMoedas = s.substring(s.indexOf(":") + 1).split("\\|")[0].replace("(ELIMINADO)", "").trim();
@@ -140,35 +155,23 @@ public class TelaJogo extends JFrame {
                     for (String m : mortasArr) cartasMortas.add(m.trim());
                 }
 
-                int cartasOcultas = eliminado ? 0 : (2 - cartasMortas.size());
-                if (cartasOcultas < 0) cartasOcultas = 0;
-
-                // Monta o mini-painel do oponente
                 JPanel opPanel = new JPanel(new BorderLayout());
-                opPanel.setBackground(PaletaCoup.BG_DEEP);
-
-                JLabel lblNomeMoedas = new JLabel(nomeOp + " - " + textoMoedas, SwingConstants.CENTER);
-                lblNomeMoedas.setForeground(eliminado ? Color.GRAY : PaletaCoup.GOLD_BRIGHT);
-                lblNomeMoedas.setFont(new Font("Arial", Font.BOLD, 18));
-                lblNomeMoedas.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-                opPanel.add(lblNomeMoedas, BorderLayout.NORTH);
+                opPanel.setOpaque(false);
+                JLabel lbl = new JLabel(partes[0].trim() + " (" + textoMoedas + ")", SwingConstants.CENTER);
+                lbl.setForeground(PaletaCoup.GOLD_BRIGHT);
+                opPanel.add(lbl, BorderLayout.NORTH);
 
                 JPanel cartasOpPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-                cartasOpPanel.setBackground(PaletaCoup.BG_DEEP);
+                cartasOpPanel.setOpaque(false);
 
-                // Adiciona cartas escondidas (vivas)
-                for (int i = 0; i < cartasOcultas; i++) {
-                    cartasOpPanel.add(criarDesenhoCarta("COUP", false, false));
-                }
-                // Adiciona cartas reveladas (mortas)
-                for (String morta : cartasMortas) {
-                    cartasOpPanel.add(criarDesenhoCarta(morta.toUpperCase(), true, false));
-                }
+                // Desenha cartas escondidas ou reveladas
+                int vivas = eliminado ? 0 : (2 - cartasMortas.size());
+                for (int i = 0; i < vivas; i++) cartasOpPanel.add(criarDesenhoCarta("COUP", false, false));
+                for (String m : cartasMortas) cartasOpPanel.add(criarDesenhoCarta(m.toUpperCase(), true, false));
 
                 opPanel.add(cartasOpPanel, BorderLayout.CENTER);
                 painelOponentes.add(opPanel);
             }
-
             painelMesa.add(painelOponentes, BorderLayout.CENTER);
             painelMesa.revalidate();
             painelMesa.repaint();
@@ -180,34 +183,32 @@ public class TelaJogo extends JFrame {
         JPanel card = new JPanel(new BorderLayout());
         card.setPreferredSize(new Dimension(100, 140));
         
-        JLabel lblTexto = new JLabel("<html><center>" + texto + "</center></html>", SwingConstants.CENTER);
-        lblTexto.setFont(new Font("Arial", Font.BOLD, 14));
+        String nomeExibicao = texto;
+        try {
+            PersonagensNomes p = PersonagensNomes.valueOf(texto.toUpperCase());
+            nomeExibicao = MascoteTradutor.getNomeMascote(p);
+        } catch (Exception e) {}
+
+        JLabel lblTexto = new JLabel("<html><center>" + nomeExibicao + "</center></html>", SwingConstants.CENTER);
+        lblTexto.setFont(new Font("Arial", Font.BOLD, 12));
 
         if (isMinha) {
-            if (morta) {
-                card.setBackground(Color.DARK_GRAY);
-                card.setBorder(new LineBorder(Color.GRAY, 2));
-                lblTexto.setForeground(Color.GRAY);
-            } else {
-                card.setBackground(PaletaCoup.ACTIVE_CARD);
-                card.setBorder(new LineBorder(PaletaCoup.GOLD_BRIGHT, 2));
-                lblTexto.setForeground(PaletaCoup.GOLD_BRIGHT);
-            }
+            card.setBackground(morta ? Color.DARK_GRAY : PaletaCoup.ACTIVE_CARD);
+            card.setBorder(new LineBorder(morta ? Color.GRAY : PaletaCoup.GOLD_BRIGHT, 2));
+            lblTexto.setForeground(morta ? Color.GRAY : PaletaCoup.GOLD_BRIGHT);
         } else {
-            if (morta) {
-                // Carta de Oponente Revelada (Morta)
-                card.setBackground(PaletaCoup.BG_CARD);
-                card.setBorder(new LineBorder(PaletaCoup.RED_SOFT, 2)); // Borda vermelha indicando morte
-                lblTexto.setForeground(Color.LIGHT_GRAY);
-            } else {
-                // Carta de Oponente Oculta
-                card.setBackground(PaletaCoup.BG_SIDEBAR);
-                card.setBorder(new LineBorder(PaletaCoup.GOLD_DIM, 2));
-                lblTexto.setForeground(PaletaCoup.GOLD_DIM); // Apenas escrito "COUP"
-            }
+            card.setBackground(morta ? PaletaCoup.BG_CARD : PaletaCoup.BG_SIDEBAR);
+            card.setBorder(new LineBorder(morta ? PaletaCoup.RED_SOFT : PaletaCoup.GOLD_DIM, 2));
+            lblTexto.setForeground(morta ? Color.LIGHT_GRAY : PaletaCoup.GOLD_DIM);
         }
-
         card.add(lblTexto, BorderLayout.CENTER);
         return card;
+    }
+
+    private void adicionarDicaPersonagem(JPanel painel, String nome, String desc) {
+        JLabel lbl = new JLabel("<html><b><font color='#F0C060'>" + nome + "</font></b> <font color='#CBA08A'>— " + desc + "</font></html>");
+        lbl.setFont(new Font("Arial", Font.PLAIN, 11));
+        lbl.setBorder(new EmptyBorder(0, 10, 0, 0));
+        painel.add(lbl);
     }
 }
