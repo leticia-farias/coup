@@ -25,11 +25,10 @@ public class AguardandoRespostaAcao implements IEstadoJogo {
 			PersonagensNomes personagemNecessario = contexto.getAcaoPendente().getPersonagemNecessario();
 			contexto.setEstado(new ResolvendoContestacao(contexto, contexto.getJogadorAutor(), respondente, personagemNecessario));
 			
-		} else if (resposta == 3) { // 3 - Bloquear
-			// Passamos null temporariamente no personagem pois o bloqueio 
-			// pode vir de personagens diferentes (ex: Capitão bloqueado por Capitão ou Embaixador)
-			contexto.setEstado(new AguardandoRespostaBloqueio(contexto, respondente, null));
-			
+		} else if (resposta == 3) {
+		    // Lê o personagem que foi gravado no contexto pelo controller
+		    PersonagensNomes personagemBloqueador = contexto.getPersonagemBloqueio();
+		    contexto.setEstado(new AguardandoRespostaBloqueio(contexto, respondente, personagemBloqueador));	
 		} else { // 2 - Aceitar
 			contexto.registrarAceites();
 		}

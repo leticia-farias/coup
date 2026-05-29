@@ -9,6 +9,7 @@ import java.util.Map;
 import coup.model.Carta;
 import coup.model.Jogador;
 import coup.model.Personagem;
+import coup.model.PersonagensNomes;
 import coup.view.IJogoView;
 import cliente.IClient;
 
@@ -194,5 +195,28 @@ public class JogoViewRemota implements IJogoView {
 	        }
 	    }
 	    return null;
+	}
+	
+	@Override
+	public PersonagensNomes perguntarPersonagemBloqueio(Jogador bloqueador, List<PersonagensNomes> personagensValidos) {
+	    try {
+	        IClient client = clientes.get(bloqueador.getNome());
+
+	        // Converte enum para string para enviar ao cliente
+	        List<String> nomes = personagensValidos.stream()
+	                .map(Enum::toString)
+	                .collect(java.util.stream.Collectors.toList());
+
+	        // Reutiliza pedirAlvo — semanticamente diferente, mas evita mudar IClient agora
+	        String escolha = client.pedirAlvo(
+	            bloqueador.getNome() + " - escolha o personagem bloqueador", nomes
+	        );
+
+	        return PersonagensNomes.valueOf(escolha);
+
+	    } catch (RemoteException e) {
+	        System.err.println("Erro ao contactar " + bloqueador.getNome() + " para bloqueio.");
+	        return personagensValidos.get(0); // fallback: primeiro personagem válido
+	    }
 	}
 }

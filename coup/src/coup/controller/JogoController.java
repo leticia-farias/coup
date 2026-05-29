@@ -149,16 +149,25 @@ public class JogoController {
 			    if (outro.equals(jogadorAtual) || !outro.isStatusAtivo()) continue;
 
 			    CompletableFuture<Void> futuro = CompletableFuture.runAsync(() -> {
-			        int resposta = view.perguntarRespostaAcao(outro, null, jogadoresAtivosLista, acao.podeSerContestada(), acao.podeSerbloqueado());
-			        
-			        synchronized (contexto) { // Sincroniza para evitar condições de corrida no estado
-			            // Só computa se o estado ainda for AguardandoRespostaAcao
-			            // Se alguém já contestou, o estado muda e os outros aceites são ignorados
+			        int resposta = view.perguntarRespostaAcao(outro, null, jogadoresAtivosLista,
+			                acao.podeSerContestada(), acao.podeSerbloqueado());
+
+			        synchronized (contexto) {
 			            if (contexto.getEstado() instanceof AguardandoRespostaAcao) {
-			                if (resposta == 1 || resposta == 3) {
-			                    if (resposta == 1) view.mostrarLog(outro.getNome() + " CONTESTOU a ação!");
-			                    if (resposta == 3) view.mostrarLog(outro.getNome() + " BLOQUEOU a ação!");
+			                if (resposta == 1) {
+			                    view.mostrarLog(outro.getNome() + " CONTESTOU a ação!");
 			                    contexto.getEstado().responderAcao(outro, resposta);
+
+			                } else if (resposta == 3) {
+			                    // NOVO: perguntar com qual personagem está bloqueando
+			                    List<coup.model.PersonagensNomes> personagensValidos = acao.getPersonagensBloquadores();
+			                    coup.model.PersonagensNomes personagemEscolhido =
+			                            view.perguntarPersonagemBloqueio(outro, personagensValidos);
+
+			                    contexto.setPersonagemBloqueio(personagemEscolhido);
+			                    view.mostrarLog(outro.getNome() + " BLOQUEOU com " + personagemEscolhido + "!");
+			                    contexto.getEstado().responderAcao(outro, resposta);
+
 			                } else {
 			                    view.mostrarLog(outro.getNome() + " aceitou.");
 			                    contexto.getEstado().responderAcao(outro, resposta);
@@ -173,6 +182,30 @@ public class JogoController {
 			CompletableFuture.allOf(futuros.toArray(new CompletableFuture[0])).join();
 			if (contexto.getEstado() instanceof coup.estadoJogo.ResolvendoContestacao) {
 			    ((coup.estadoJogo.ResolvendoContestacao) contexto.getEstado()).resolverContestacao();
+			}
+
+			// NOVO: Resolve bloqueio pendente — pergunta ao autor da ação se quer contestar
+			if (contexto.getEstado() instanceof coup.estadoJogo.AguardandoRespostaBloqueio) {
+			    coup.estadoJogo.AguardandoRespostaBloqueio estadoBloqueio =
+			            (coup.estadoJogo.AguardandoRespostaBloqueio) contexto.getEstado();
+
+			    view.mostrarLog("Ação de " + jogadorAtual.getNome() + " foi bloqueada. Deseja contestar o bloqueio?");
+
+			    // Apenas o autor da ação pode contestar o bloqueio (regra oficial do Coup)
+			    int respostaAoBloqueio = view.perguntarRespostaAcao(
+			            jogadorAtual, null, jogadoresAtivosLista,
+			            true,  // pode contestar
+			            false  // não pode bloquear um bloqueio
+			    );
+
+			    synchronized (contexto) {
+			        estadoBloqueio.responderAcao(jogadorAtual, respostaAoBloqueio);
+			    }
+
+			    // Se contestou o bloqueio, resolve agora
+			    if (contexto.getEstado() instanceof coup.estadoJogo.ResolvendoContestacao) {
+			        ((coup.estadoJogo.ResolvendoContestacao) contexto.getEstado()).resolverContestacao();
+			    }
 			}
 
 			// 3. Resolve os desfechos pendentes na View...

@@ -6,6 +6,7 @@ import java.util.Scanner;
 import coup.model.Carta;
 import coup.model.Jogador;
 import coup.model.Personagem;
+import coup.model.PersonagensNomes;
 
 public class Console implements IJogoView {
 
@@ -329,4 +330,21 @@ public class Console implements IJogoView {
 	    return cartasAtivas.get(index);
 	}
 
+	
+	@Override
+	public PersonagensNomes perguntarPersonagemBloqueio(Jogador bloqueador, List<PersonagensNomes> personagensValidos) {
+	    separarMensagens();
+	    System.out.println(bloqueador.getNome() + ", com qual personagem você está bloqueando?");
+
+	    for (int i = 0; i < personagensValidos.size(); i++) {
+	        System.out.println(i + " - " + personagensValidos.get(i));
+	    }
+
+	    int index;
+	    do {
+	        index = lerInteiro();
+	    } while (index < 0 || index >= personagensValidos.size());
+
+	    return personagensValidos.get(index);
+	}
 }

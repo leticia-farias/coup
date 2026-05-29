@@ -1,6 +1,8 @@
 
 package coup.acoes;
 
+import java.util.List;
+
 import coup.model.Jogador;
 import coup.model.PersonagensNomes;
 
@@ -47,5 +49,10 @@ public class Capitar implements Acao {
         alvo.setSaldo(alvo.getSaldo() - valorRoubo);
 
         System.out.println(autor.getNome() + " roubou " + valorRoubo + " moedas de " + alvo.getNome());
+    }
+    
+    @Override
+    public List<PersonagensNomes> getPersonagensBloquadores() {
+        return List.of(PersonagensNomes.CAPITAO, PersonagensNomes.EMBAIXADOR, PersonagensNomes.INQUISIDOR);
     }
 }
