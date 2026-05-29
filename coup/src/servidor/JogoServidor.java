@@ -10,8 +10,9 @@ import coup.controller.JogoController;
 public class JogoServidor extends UnicastRemoteObject implements IJogoServidor {
 
     private final JogoViewRemota viewRemota;
-    private final int numJogadoresAlvo = 3; // O jogo inicia automaticamente com 3 jogadores
+    private final int numJogadoresAlvo = 3;
     private int jogadoresConectados = 0;
+    private IClient clienteHost = null; // NOVO: primeiro jogador a conectar
 
     public JogoServidor() throws RemoteException {
         super();
@@ -25,17 +26,27 @@ public class JogoServidor extends UnicastRemoteObject implements IJogoServidor {
             return;
         }
 
+        // Primeiro jogador a conectar é o host
+        if (jogadoresConectados == 0) {
+            clienteHost = cliente;
+            viewRemota.setHost(cliente); // NOVO
+        }
+
         viewRemota.adicionarCliente(nomeJogador, cliente);
         jogadoresConectados++;
         viewRemota.mostrarLog(nomeJogador + " entrou no lobby. (" + jogadoresConectados + "/" + numJogadoresAlvo + ")");
 
         if (jogadoresConectados == numJogadoresAlvo) {
-            // Inicia a thread do motor do jogo quando o lobby estiver cheio
             new Thread(() -> {
-                viewRemota.mostrarLog("Lobby cheio! Iniciando a partida...");
-                JogoController controller = new JogoController(viewRemota);
-                controller.prepararJogo();
-                controller.iniciarPartida();
+                try {
+                    viewRemota.mostrarLog("Lobby cheio! O host escolherá a versão do jogo...");
+                    JogoController controller = new JogoController(viewRemota);
+                    controller.prepararJogo();
+                    controller.iniciarPartida();
+                } catch (Exception e) {
+                    viewRemota.mostrarLog("Erro fatal na partida: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }).start();
         }
     }
@@ -45,7 +56,7 @@ public class JogoServidor extends UnicastRemoteObject implements IJogoServidor {
             Registry registry = LocateRegistry.createRegistry(1099);
             JogoServidor servidor = new JogoServidor();
             registry.rebind("CoupServidor", servidor);
-            System.out.println("Servidor do Coup iniciado com sucesso.");
+            System.out.println("Servidor do Coup iniciado.");
         } catch (Exception e) {
             System.err.println("Erro ao iniciar o servidor: " + e.getMessage());
             e.printStackTrace();

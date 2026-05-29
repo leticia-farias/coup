@@ -36,4 +36,9 @@ public interface IJogoView {
 	void mostrarSaldos(List<Jogador> jogadoresList);
 	
 	PersonagensNomes perguntarPersonagemBloqueio(Jogador bloqueador, List<PersonagensNomes> personagensValidos);
+	
+	int    perguntarAcaoComInquisidor(Jogador jogador);
+	Carta  pedirCartaParaRevelar(Jogador alvo);               // alvo escolhe qual mostrar
+	void   mostrarCartaPrivada(Jogador destinatario, Carta carta); // só o inquisidor vê
+	boolean perguntarForcaExame(Jogador inquisidor);          // forçar troca ou não?
 }

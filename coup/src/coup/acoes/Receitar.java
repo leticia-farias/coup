@@ -1,5 +1,7 @@
 package coup.acoes;
 
+import java.util.List;
+
 import coup.model.Jogador;
 import coup.model.PersonagensNomes;
 
@@ -34,5 +36,10 @@ public class Receitar implements Acao {
     public void executar(Jogador autor, Jogador alvo) {
         autor.setSaldo(autor.getSaldo() + 1);
         System.out.println(autor.getNome() + " recebeu 1 moeda de renda.");
+    }
+    
+    @Override
+    public List<PersonagensNomes> getPersonagensBloquadores() {
+        return List.of();
     }
 }

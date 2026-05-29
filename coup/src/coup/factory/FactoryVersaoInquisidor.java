@@ -6,11 +6,13 @@ import coup.acoes.Assassinar;
 import coup.acoes.Capitar;
 import coup.acoes.Ducar;
 import coup.acoes.Golpear;
+import coup.acoes.InquisidorExaminar;
+import coup.acoes.InquisidorTrocar;
 import coup.acoes.Receitar;
 import coup.model.Baralho;
 
 public class FactoryVersaoInquisidor implements IJogoFactory {
-	
+
 	@Override
 	public Acao acoes(int opcao, Baralho baralho) {
 		Acao acao = null;
@@ -22,8 +24,8 @@ public class FactoryVersaoInquisidor implements IJogoFactory {
 			acao = new Capitar();
 			break;
 		case 3:
-			acao = new Ducar(); // TODO: Criar a classe Inquisidar posteriormente. Usa Ducar como placeholder.
-			break;
+		    acao = new InquisidorTrocar();
+		    break;
 		case 4:
 			acao = new Ajudar();
 			break;
@@ -36,6 +38,9 @@ public class FactoryVersaoInquisidor implements IJogoFactory {
 		case 7:
 			acao = new Golpear();
 			break;
+		case 8:
+		    acao = new InquisidorExaminar();
+		    break;
 		}
 		return acao;
 	}
