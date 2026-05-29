@@ -70,120 +70,171 @@ public class JogoController {
 		// distribui duas cartas para cada jogador
 		baralho.distribuirCartas(jogadoresLista, baralhoCartas);
 		
-		iniciarProximoTurno();
+		//iniciarProximoTurno();
 	}
-	
+
+
+
 	public void iniciarPartida() {
         while (contarJogadoresVivos() > 1) {
             iniciarProximoTurno();
         }
-        
+        // Quando sai do loop, significa que sobrou apenas 1 jogador vivo
+        Jogador vencedor = jogadoresAtivosLista.stream().filter(Jogador::isStatusAtivo).findFirst().get();
+        view.mostrarLog("\n FIM DE JOGO! O grande vencedor é: " + vencedor.getNome().toUpperCase());
     }
 	
 	private int contarJogadoresVivos() {
 		return (int) jogadoresAtivosLista.stream().filter(Jogador::isStatusAtivo).count();
 	}
 
+	//loop que ignora os jogadores mortos 
 	private void iniciarProximoTurno() {
+		Jogador jogadorAtual;
+		do {
 		// Soma 1 para ir para o próximo, e o % garante que volta ao zero quando chega ao final da lista
-		indexJogadorAtual = (indexJogadorAtual + 1) % jogadoresAtivosLista.size();
-		Jogador jogadorAtual = jogadoresAtivosLista.get(indexJogadorAtual);
-		
+			indexJogadorAtual = (indexJogadorAtual + 1) % jogadoresAtivosLista.size();
+			jogadorAtual = jogadoresAtivosLista.get(indexJogadorAtual);
+		} while (!jogadorAtual.isStatusAtivo()); // Pula os eliminados
+
 		processarTurno(jogadorAtual);
 	}
 	
-	private void processarTurno(Jogador jogadorAtual) {
-		// 1. Inicializa o contexto (agora com o baralho)
-		if (this.contexto == null) {
-			this.contexto = new ContextoJogo(null, jogadorAtual, baralho);
-			this.contexto.setTotalJogadoresAtivos(contarJogadoresVivos());
-		} else {
-			this.contexto.setJogadorAutor(jogadorAtual);
-		}
-		
-		if (view instanceof servidor.JogoViewRemota) {
-		    ((servidor.JogoViewRemota) view).enviarCartasParaJogador(jogadorAtual);
-		}
-		int respostaAcao = view.perguntarAcao(jogadorAtual);
-		Acao acao = versaoJogo.acoes(respostaAcao, baralho);
-		
-		// AVISA TODOS OS CLIENTES SOBRE A AÇÃO ESCOLHIDA
-		view.mostrarLog("\n>>> O jogador " + jogadorAtual.getNome() + " iniciou a ação: " + acao.getClass().getSimpleName().toUpperCase());
-		
-		contexto.setAcaoPendente(acao);
+private void processarTurno(Jogador jogadorAtual) {
+        // 1. Inicializa o contexto (agora com o baralho)
+        if (this.contexto == null) {
+            this.contexto = new ContextoJogo(null, jogadorAtual, baralho);
+            this.contexto.setTotalJogadoresAtivos(contarJogadoresVivos());
+        } else {
+            this.contexto.setJogadorAutor(jogadorAtual);
+        }
+        
+        // 2. Atualiza as cartas na tela antes de pedir a jogada
+        if (view instanceof servidor.JogoViewRemota) {
+            ((servidor.JogoViewRemota) view).enviarCartasParaJogador(jogadorAtual);
+        }
+        
+        // 3. Determina a ação respeitando a regra de 10 moedas obrigatórias
+        int respostaAcao;
+        if (jogadorAtual.getSaldo() >= 10) {
+            view.mostrarLog("\n🚨 OBRIGATÓRIO! " + jogadorAtual.getNome() + " acumulou " + jogadorAtual.getSaldo() + " moedas e DEVE realizar um Golpe de Estado!");
+            respostaAcao = 7; 
+        } else {
+            respostaAcao = view.perguntarAcao(jogadorAtual);
+        }
+        
+        Acao acao = versaoJogo.acoes(respostaAcao, baralho);
+        
+        // 4. Cobrança imediata
+        if (acao.getClass().getSimpleName().equals("Assassinar")) {
+            jogadorAtual.setSaldo(jogadorAtual.getSaldo() - 3);
+        } else if (acao.getClass().getSimpleName().equals("Golpear")) {
+            jogadorAtual.setSaldo(jogadorAtual.getSaldo() - 7);
+        }
 
-		if (acao.requerAlvo()) {
-			Jogador alvo = view.perguntarAlvo(jogadorAtual, jogadoresAtivosLista);
-			contexto.setJogadorAlvo(alvo);
-		}
-		
-		// 2. Processa respostas (Bloqueios/Contestações)
-		if (acao.podeSerContestada() || acao.podeSerbloqueado()) {
-			contexto.setEstado(new AguardandoRespostaAcao(contexto));
-			
-			List<CompletableFuture<Void>> futuros = new ArrayList<>();
+        // 5. Avisa os clientes e define o alvo
+        view.mostrarLog("\n>>> O jogador " + jogadorAtual.getNome() + " iniciou a ação: " + acao.getClass().getSimpleName().toUpperCase());
+        
+        contexto.setAcaoPendente(acao);
 
-			for (Jogador outro : jogadoresAtivosLista) {
-			    if (outro.equals(jogadorAtual) || !outro.isStatusAtivo()) continue;
+        if (acao.requerAlvo()) {
+            Jogador alvo = view.perguntarAlvo(jogadorAtual, jogadoresAtivosLista);
+            contexto.setJogadorAlvo(alvo);
+        }
+        
+        // 6. Processa respostas (Bloqueios/Contestações)
+        if (acao.podeSerContestada() || acao.podeSerbloqueado()) {
+            contexto.setEstado(new AguardandoRespostaAcao(contexto));
+            
+            List<CompletableFuture<Void>> futuros = new ArrayList<>();
 
-			    CompletableFuture<Void> futuro = CompletableFuture.runAsync(() -> {
-			        int resposta = view.perguntarRespostaAcao(outro, null, jogadoresAtivosLista, acao.podeSerContestada(), acao.podeSerbloqueado());
-			        
-			        synchronized (contexto) { // Sincroniza para evitar condições de corrida no estado
-			            // Só computa se o estado ainda for AguardandoRespostaAcao
-			            // Se alguém já contestou, o estado muda e os outros aceites são ignorados
-			            if (contexto.getEstado() instanceof AguardandoRespostaAcao) {
-			                if (resposta == 1 || resposta == 3) {
-			                    if (resposta == 1) view.mostrarLog(outro.getNome() + " CONTESTOU a ação!");
-			                    if (resposta == 3) view.mostrarLog(outro.getNome() + " BLOQUEOU a ação!");
-			                    contexto.getEstado().responderAcao(outro, resposta);
-			                } else {
-			                    view.mostrarLog(outro.getNome() + " aceitou.");
-			                    contexto.getEstado().responderAcao(outro, resposta);
-			                }
-			            }
-			        }
-			    });
-			    futuros.add(futuro);
-			}
+            for (Jogador outro : jogadoresAtivosLista) {
+                if (outro.equals(jogadorAtual) || !outro.isStatusAtivo()) continue;
 
-			// Bloqueia o loop principal até que todos tenham respondido
-			CompletableFuture.allOf(futuros.toArray(new CompletableFuture[0])).join();
-			if (contexto.getEstado() instanceof coup.estadoJogo.ResolvendoContestacao) {
-			    ((coup.estadoJogo.ResolvendoContestacao) contexto.getEstado()).resolverContestacao();
-			}
+                CompletableFuture<Void> futuro = CompletableFuture.runAsync(() -> {
+                    int resposta = view.perguntarRespostaAcao(outro, null, jogadoresAtivosLista, acao.podeSerContestada(), acao.podeSerbloqueado());
+                    
+                    synchronized (contexto) { 
+                        if (contexto.getEstado() instanceof AguardandoRespostaAcao) {
+                            if (resposta == 1 || resposta == 3) {
+                                if (resposta == 1) view.mostrarLog(outro.getNome() + " CONTESTOU a ação!");
+                                if (resposta == 3) view.mostrarLog(outro.getNome() + " BLOQUEOU a ação!");
+                                contexto.getEstado().responderAcao(outro, resposta);
+                            } else {
+                                view.mostrarLog(outro.getNome() + " aceitou.");
+                                contexto.getEstado().responderAcao(outro, resposta);
+                            }
+                        }
+                    }
+                });
+                futuros.add(futuro);
+            }
 
-			// 3. Resolve os desfechos pendentes na View...
-		} else {
-			// Ações inquestionáveis (Renda, Golpe de Estado)
-			acao.executar(jogadorAtual, contexto.getJogadorAlvo());
-			
-			if (acao.getClass().getSimpleName().equals("Golpear")) {
-				contexto.setEstado(new AguardandoDescarte(contexto, contexto.getJogadorAlvo(), false));
-			} else {
-				contexto.setEstado(new AguardandoAcao(contexto));
-			}
-		}
+            CompletableFuture.allOf(futuros.toArray(new CompletableFuture[0])).join();
+            // Resolve se alguém BLOQUEOU a ação original
+            if (contexto.getEstado() instanceof coup.estadoJogo.AguardandoRespostaBloqueio) {
+                coup.estadoJogo.AguardandoRespostaBloqueio estadoBloqueio = (coup.estadoJogo.AguardandoRespostaBloqueio) contexto.getEstado();
+                
+                view.mostrarLog("A ação foi BLOQUEADA!");
+                
+                // Pergunta ao autor da ação se ele quer contestar o bloqueio (ex: duvidar da Condessa do alvo)
+                // Usamos o jogadorAutor do contexto
+                int respostaAoBloqueio = view.perguntarRespostaAcao(contexto.getJogadorAutor(), null, jogadoresAtivosLista, true, false);
+                
+                if (respostaAoBloqueio == 1) { // 1 = Contestar o bloqueio
+                    view.mostrarLog(contexto.getJogadorAutor().getNome() + " DUVIDOU do bloqueio!");
+                    estadoBloqueio.responderAcao(contexto.getJogadorAutor(), 1);
+                    
+                    // Como virou uma contestação, precisamos resolver para ver quem perde a carta
+                    if (contexto.getEstado() instanceof coup.estadoJogo.ResolvendoContestacao) {
+                        ((coup.estadoJogo.ResolvendoContestacao) contexto.getEstado()).resolverContestacao();
+                    }
+                } else {
+                    view.mostrarLog(contexto.getJogadorAutor().getNome() + " aceitou o bloqueio. A ação falhou.");
+                    estadoBloqueio.responderAcao(contexto.getJogadorAutor(), 2); // 2 = Aceitar
+                }
+            }
 
-		// 3. Resolve os desfechos pendentes na View (Ex: Descarte)
-		if (contexto.getEstado() instanceof AguardandoDescarte) {
-			AguardandoDescarte estadoDescarte = (AguardandoDescarte) contexto.getEstado();
-			Jogador perdedor = estadoDescarte.getJogadorQueDescarta();
-			
-			if (perdedor != null && perdedor.isStatusAtivo()) {
-				view.mostrarLog(perdedor.getNome() + " deve perder uma carta!");
-				coup.model.Carta cartaMorta = view.pedirCartaParaDescarte(perdedor);
-				
-				estadoDescarte.descartarCarta(cartaMorta);
-				view.mostrarLog(perdedor.getNome() + " perdeu a carta: " + cartaMorta.getPersonagem().getNome());
-			}
-		}
-	}
+        } else {
+            // Ações inquestionáveis (Renda, Golpe de Estado)
+            acao.executar(jogadorAtual, contexto.getJogadorAlvo());
+            
+            if (acao.getClass().getSimpleName().equals("Golpear")) {
+                contexto.setEstado(new AguardandoDescarte(contexto, contexto.getJogadorAlvo(), false));
+            } else {
+                contexto.setEstado(new AguardandoAcao(contexto));
+            }
+        }
 
-	public void pedirAcao(Jogador jogador) {
-		
-		view.perguntarAcao(jogador);
-	}
-	
+        // 7. Resolve os desfechos pendentes na View (Ex: Descarte ou Troca do Embaixador)
+        if (acao.getClass().getSimpleName().equals("Embaixadar") && contexto.getEstado() instanceof coup.estadoJogo.AguardandoTrocaEmbaixador) {
+            coup.estadoJogo.AguardandoTrocaEmbaixador estadoTroca = (coup.estadoJogo.AguardandoTrocaEmbaixador) contexto.getEstado();
+            
+            for (int i = 0; i < 2; i++) {
+                view.mostrarLog("\n[EMBAIXADOR] " + jogadorAtual.getNome() + ", escolha a " + (i + 1) + "ª carta para DEVOLVER ao baralho:");
+                coup.model.Carta cartaDevolvida = view.pedirCartaParaDescarte(jogadorAtual);
+                estadoTroca.descartarCarta(cartaDevolvida); 
+            }
+            view.mostrarLog(jogadorAtual.getNome() + " devolveu as cartas excedentes ao baralho.");
+        }
+        
+        if (contexto.getEstado() instanceof AguardandoDescarte) {
+            AguardandoDescarte estadoDescarte = (AguardandoDescarte) contexto.getEstado();
+            Jogador perdedor = estadoDescarte.getJogadorQueDescarta();
+            
+            if (perdedor != null && perdedor.isStatusAtivo()) {
+                view.mostrarLog(perdedor.getNome() + " deve descartar uma carta para a mesa!");
+                coup.model.Carta cartaMorta = view.pedirCartaParaDescarte(perdedor);
+                
+                estadoDescarte.descartarCarta(cartaMorta);
+                view.mostrarLog( perdedor.getNome() + " revelou e PERDEU a influência de: " + cartaMorta.getPersonagem().getNome());
+            }
+        }
+        
+        view.mostrarLog("\n=============================================");
+        view.mostrarLog("Ação Finalizada com sucesso!");
+        view.mostrarSaldos(jogadoresAtivosLista);
+        view.mostrarLog("=============================================\n");
+    }
 	
 }

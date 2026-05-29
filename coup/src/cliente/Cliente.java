@@ -39,6 +39,15 @@ public class Cliente extends UnicastRemoteObject implements IClient {
     }
 
     @Override
+    public int pedirHabilidadeInquisidor() throws RemoteException {
+        System.out.println("\n[INQUISIDOR] Qual habilidade deseja usar?");
+        System.out.println("1 - Trocar 1 carta com o baralho");
+        System.out.println("2 - Espionar a carta de um jogador");
+        System.out.print("Sua escolha: ");
+        return sc.nextInt();
+    }
+
+    @Override
     public String pedirAlvo(String nome, List<String> possiveisAlvos) throws RemoteException {
         System.out.println("\nEscolha um alvo:");
         for (int i = 0; i < possiveisAlvos.size(); i++) {
@@ -80,6 +89,29 @@ public class Cliente extends UnicastRemoteObject implements IClient {
         return sc.nextInt() - 1; // Retorna o índice (0 ou 1) para o servidor
     }
 
+    //metodos do inquisidor 
+    @Override
+    public int pedirCartaParaMostrar(String nome, List<String> cartasAtivas) throws RemoteException {
+        System.out.println("\n[INQUISIDOR] " + nome + ", você está sendo espionado! Escolha UMA carta para mostrar:");
+        for (int i = 0; i < cartasAtivas.size(); i++) {
+            System.out.println((i + 1) + " - " + cartasAtivas.get(i));
+        }
+        System.out.print("Digite o número da carta: ");
+        return sc.nextInt() - 1;
+    }
+
+    @Override
+    public int decidirDestinoCartaEspionada(String nomeInquisidor, String cartaMostrada) throws RemoteException {
+        System.out.println("\n[DECISÃO DO INQUISIDOR] O alvo te mostrou a carta: " + cartaMostrada);
+        System.out.println("O que você deseja fazer?");
+        System.out.println("1 - Forçar o alvo a trocar esta carta com o baralho");
+        System.out.println("2 - Deixar o alvo manter a carta");
+        System.out.print("Sua escolha: ");
+        return sc.nextInt();
+    }
+
+    //TODO: refatorar para não utilizar o suppres warnings
+    @SuppressWarnings("resource") // reselve o alerta do scanner never closed
     public static void main(String[] args) {
         try {
             Scanner scanner = new Scanner(System.in);
@@ -100,7 +132,7 @@ public class Cliente extends UnicastRemoteObject implements IClient {
             e.printStackTrace();
         }
     }
-    
+
     @Override
     public void mostrarSuasCartas(List<String> cartas) throws RemoteException {
         System.out.println("\n--- SUAS CARTAS ---");

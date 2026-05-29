@@ -318,4 +318,18 @@ public class Console implements IJogoView {
 		return null;
 	}
 
+	@Override
+	public int pedirHabilidadeInquisidor(Jogador jogador) { 
+		return 1; 
+	}
+
+	@Override
+	public Carta pedirCartaParaMostrar(Jogador jogador) { 
+		return null; 
+	}
+
+	@Override
+	public boolean decidirTrocaInquisidor(Jogador inquisidor, Carta cartaMostrada) { 
+		return false; 
+	}
 }
