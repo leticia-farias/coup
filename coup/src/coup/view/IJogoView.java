@@ -33,4 +33,9 @@ public interface IJogoView {
 	public Carta pedirCartaParaDescarte(Jogador jogador);
 	
 	public void mostrarSaldos(List<Jogador> jogadoresList);
+	
+	// novos metodos do inquisidor
+	public int pedirHabilidadeInquisidor(Jogador jogador);
+	public Carta pedirCartaParaMostrar(Jogador jogador);
+	public boolean decidirTrocaInquisidor(Jogador inquisidor, Carta cartaMostrada);
 }

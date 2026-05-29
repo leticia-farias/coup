@@ -13,5 +13,9 @@ public interface IClient extends Remote {
     int pedirDescarte(String nome, List<String> cartasAtivas) throws RemoteException;
     void mostrarSaldos(List<String> saldos) throws RemoteException;
     void receberLog(String mensagem) throws RemoteException;
-    
+    int pedirCartaParaMostrar(String nome, List<String> cartasAtivas) throws RemoteException;
+    int decidirDestinoCartaEspionada(String nomeInquisidor, String cartaMostrada) throws RemoteException;
+    int pedirHabilidadeInquisidor() throws RemoteException;
+    int pedirModoJogo() throws RemoteException;
+    void sincronizarEstado() throws RemoteException;
 }

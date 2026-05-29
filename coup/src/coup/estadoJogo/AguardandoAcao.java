@@ -6,38 +6,41 @@ import coup.model.Jogador;
 
 public class AguardandoAcao implements IEstadoJogo {
 
-	private ContextoJogo contexto;
-	private Acao acaoPendente;
-	private int jogadoresConcordantes = 0;
-	private int totalVotos;
-	private Jogador jogadorAtual;
+    /*private ContextoJogo contexto;
+    private Acao acaoPendente;
+    private int jogadoresConcordantes = 0;
+    private int totalVotos;
+    private Jogador jogadorAtual; */
 
-	public AguardandoAcao(ContextoJogo contexto, Acao acaoPendente, int totalAtivos) {
-		this.contexto = contexto;
-		this.acaoPendente = acaoPendente;
-		this.totalVotos = totalAtivos - 1;
-	}
-	
-	public AguardandoAcao(ContextoJogo contexto) {
-		this.contexto = contexto;
-	}
 
-	@Override
-	public void escolherAcao(Acao acao) {
-		// TODO: implementar método de escolher ação
-	}
+    /*public AguardandoAcao(ContextoJogo contexto, Acao acaoPendente, int totalAtivos) {
+        this.contexto = contexto;
+        this.acaoPendente = acaoPendente;
+        this.totalVotos = totalAtivos - 1
+    } */
+   
+    private ContextoJogo contexto;
 
-	@Override
-	public void responderAcao(Jogador respondente, int resposta) {
-		throw new IllegalStateException("Não é possível responder uma ação, pois ainda está sendo escolhida");
-	}
+    // Construtor limpo e correto usado pelo JogoController
+    public AguardandoAcao(ContextoJogo contexto) {
+        this.contexto = contexto;
+    }
 
-	@Override
-	public void descartarCarta(Carta carta) {
-		throw new IllegalStateException("Não é o momento de descartar cartas");
-	}
-	
-	
+    @Override
+    public void escolherAcao(Acao acao) {
+        // Define a ação escolhida na memória do turno corrente
+        contexto.setAcaoPendente(acao);
+    }
 
-	
+    @Override
+    public void responderAcao(Jogador respondente, int resposta) {
+        // Bloqueio de segurança: Ninguém pode reagir antes da ação ser definida
+        throw new IllegalStateException("Não é possível responder a uma ação, pois ela ainda está a ser escolhida.");
+    }
+
+    @Override
+    public void descartarCarta(Carta carta) {
+        // Bloqueio de segurança: Ninguém perde cartas no início do turno
+        throw new IllegalStateException("Não é o momento de descartar cartas.");
+    }
 }
