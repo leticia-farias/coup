@@ -309,8 +309,24 @@ public class Console implements IJogoView {
 
 	@Override
 	public Carta pedirDescarteEmbaixador(Jogador jogador) {
-		// TODO Auto-generated method stub
-		return null;
+	    separarMensagens();
+	    System.out.println(jogador.getNome() + ", você comprou 2 cartas do baralho.");
+	    System.out.println("Escolha uma carta para DEVOLVER ao baralho:");
+
+	    List<Carta> cartasAtivas = jogador.getJogadorCartas().getCartas().stream()
+	            .filter(Carta::isStatusAtiva)
+	            .collect(java.util.stream.Collectors.toList());
+
+	    for (int i = 0; i < cartasAtivas.size(); i++) {
+	        System.out.println(i + " - " + cartasAtivas.get(i).getPersonagem().getNome());
+	    }
+
+	    int index;
+	    do {
+	        index = lerInteiro();
+	    } while (index < 0 || index >= cartasAtivas.size());
+
+	    return cartasAtivas.get(index);
 	}
 
 }

@@ -205,9 +205,22 @@ public class JogoController {
 			}
 		}
 		
-		if (contexto.getEstado() instanceof AguardandoTrocaEmbaixador) {
-			view.mostrarLog(jogadorAtual.getNome() + " deve perder uma carta!");
-		    // pedir 2 descartes ao jogador via view
+		// Troca do Embaixador: jogador deve devolver 2 cartas ao baralho
+		if (contexto.getEstado() instanceof coup.estadoJogo.AguardandoTrocaEmbaixador) {
+		    coup.estadoJogo.AguardandoTrocaEmbaixador estadoTroca =
+		            (coup.estadoJogo.AguardandoTrocaEmbaixador) contexto.getEstado();
+
+		    view.mostrarLog(jogadorAtual.getNome() + " deve devolver 2 cartas ao baralho.");
+
+		    // Pede a devolução 2 vezes — cada chamada remove uma carta da mão
+		    for (int i = 0; i < 2; i++) {
+		        Carta cartaDevolvida = view.pedirDescarteEmbaixador(jogadorAtual);
+
+		        if (cartaDevolvida != null) {
+		            estadoTroca.descartarCarta(cartaDevolvida);
+		            view.mostrarLog(jogadorAtual.getNome() + " devolveu uma carta ao baralho.");
+		        }
+		    }
 		}
 		
 		// Avisa todos do resultado final do turno

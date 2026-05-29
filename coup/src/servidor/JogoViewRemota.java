@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import coup.model.Carta;
 import coup.model.Jogador;
 import coup.model.Personagem;
 import coup.view.IJogoView;
@@ -155,8 +157,42 @@ public class JogoViewRemota implements IJogoView {
 	}
 	
 	@Override
-	public coup.model.Carta pedirDescarteEmbaixador(Jogador jogador) {
-	    // TODO: Implementar a chamada RMI para o Embaixador futuramente
+	public Carta pedirDescarteEmbaixador(Jogador jogador) {
+	    try {
+	        IClient client = clientes.get(jogador.getNome());
+
+	        List<String> nomesCartas = new ArrayList<>();
+	        List<Carta> cartasAtivas = new ArrayList<>();
+
+	        for (Carta c : jogador.getJogadorCartas().getCartas()) {
+	            if (c.isStatusAtiva()) {
+	                nomesCartas.add(c.getPersonagem().getNome().toString());
+	                cartasAtivas.add(c);
+	            }
+	        }
+
+	        // Reutilizamos pedirDescarte — a diferença semântica fica na mensagem enviada
+	        // Para distinguir no cliente, você pode criar um método pedirDescarteEmbaixador
+	        // na interface IClient futuramente. Por ora, reutilizar é seguro.
+	        int indexEscolhido = client.pedirDescarte(
+	            jogador.getNome() + " (Embaixador - devolva ao baralho)", nomesCartas
+	        );
+
+	        if (indexEscolhido < 0 || indexEscolhido >= cartasAtivas.size()) {
+	            indexEscolhido = 0;
+	        }
+
+	        return cartasAtivas.get(indexEscolhido);
+
+	    } catch (RemoteException e) {
+	        System.err.println("Erro ao contactar " + jogador.getNome() + " para troca do Embaixador.");
+	        // Fallback: devolve a última carta ativa
+	        for (int i = jogador.getJogadorCartas().getCartas().size() - 1; i >= 0; i--) {
+	            if (jogador.getJogadorCartas().getCartas().get(i).isStatusAtiva()) {
+	                return jogador.getJogadorCartas().getCartas().get(i);
+	            }
+	        }
+	    }
 	    return null;
 	}
 }
