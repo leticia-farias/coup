@@ -2,7 +2,7 @@ package servidor;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +15,7 @@ import cliente.IClient;
 
 public class JogoViewRemota implements IJogoView {
 
-    private final Map<String, IClient> clientes = new HashMap<>();
+    private final Map<String, IClient> clientes = new ConcurrentHashMap<>();
     private IClient host = null; 
     
     public void setHost(IClient host) {
