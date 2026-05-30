@@ -2,17 +2,13 @@ package coup.acoes;
 
 import java.util.List;
 
-import coup.model.Baralho;
 import coup.model.Jogador;
 import coup.model.PersonagensNomes;
+import coup.estadoJogo.ContextoJogo;
+import coup.estadoJogo.IEstadoJogo;
+import coup.estadoJogo.AguardandoTrocaEmbaixador;
 
 public class Embaixadar implements Acao {
-
-	private Baralho baralho;
-
-	public Embaixadar(Baralho baralho) {
-		this.baralho = baralho;
-	}
 
 	@Override
 	public boolean requerAlvo() {
@@ -41,18 +37,20 @@ public class Embaixadar implements Acao {
 
 	@Override
 	public void executar(Jogador autor, Jogador alvo) {
+		// Fica vazio. A lógica de compra de cartas ocorre na transição de estado.
+	}
+	
+	@Override
+	public IEstadoJogo proximoEstado(ContextoJogo contexto) {
 		// Puxa 2 cartas extras e coloca temporariamente na mão do jogador
-		autor.getJogadorCartas().getCartas().add(baralho.comprarCarta());
-		autor.getJogadorCartas().getCartas().add(baralho.comprarCarta());
+		contexto.getJogadorAutor().getJogadorCartas().getCartas().add(contexto.getBaralho().comprarCarta());
+		contexto.getJogadorAutor().getJogadorCartas().getCartas().add(contexto.getBaralho().comprarCarta());
+		
+		return new AguardandoTrocaEmbaixador(contexto, contexto.getJogadorAutor(), contexto.getBaralho());
 	}
 
 	@Override
 	public List<PersonagensNomes> getPersonagensBloquadores() {
 		return List.of();
-	}
-	
-	@Override
-	public coup.estadoJogo.IEstadoJogo proximoEstado(coup.estadoJogo.ContextoJogo contexto) {
-	    return new coup.estadoJogo.AguardandoTrocaEmbaixador(contexto, contexto.getJogadorAutor(), contexto.getBaralho());
 	}
 }

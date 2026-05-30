@@ -23,7 +23,7 @@ public class FactoryVersaoOriginal implements IJogoFactory {
 			acao = new Capitar();
 			break;
 		case 3:
-			acao = new Embaixadar(baralho);
+			acao = new Embaixadar();
 			break;
 		case 4:
 			acao = new Ajudar();

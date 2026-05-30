@@ -6,7 +6,7 @@ import coup.acoes.Assassinar;
 import coup.acoes.Capitar;
 import coup.acoes.Ducar;
 import coup.acoes.Golpear;
-import coup.acoes.InquisidarEspionar;
+import coup.acoes.InquisidorExaminar;
 import coup.acoes.InquisidorTrocar;
 import coup.acoes.Receitar;
 import coup.model.Baralho;
@@ -38,9 +38,10 @@ public class FactoryVersaoInquisidor implements IJogoFactory {
 		case 7:
 			acao = new Golpear();
 			break;
-		case 8: acao = new InquisidarEspionar();
-		 break; 	
-	} // TODO: Reorganizar a ordem dos cases para seguir a ordem do meno do jogador
+		case 8: 
+			acao = new InquisidorExaminar();
+		 	break; 	
+		}
 		return acao;
 	}
 }
