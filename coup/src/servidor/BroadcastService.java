@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 public class BroadcastService {
-    private final Map<String, ClienteProxy> clientes;
+	private final Map<Integer, ClienteProxy> clientes;
 
-    public BroadcastService(Map<String, ClienteProxy> clientes) {
+    public BroadcastService(Map<Integer, ClienteProxy> clientes) {
         this.clientes = clientes;
     }
 

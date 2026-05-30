@@ -15,7 +15,7 @@ import coup.view.IJogoView;
 
 public class JogoViewRemota implements IJogoView {
 
-    private final Map<String, ClienteProxy> clientes = new ConcurrentHashMap<>();
+    private final Map<Integer, ClienteProxy> clientes = new ConcurrentHashMap<>();
     private final BroadcastService broadcast = new BroadcastService(clientes);
     private IClient host = null; 
 
@@ -23,13 +23,14 @@ public class JogoViewRemota implements IJogoView {
         Thread heartbeat = new Thread(() -> {
             while (true) {
                 try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
-                for (Map.Entry<String, ClienteProxy> entry : clientes.entrySet()) {
+                for (Map.Entry<Integer, ClienteProxy> entry : clientes.entrySet()) {
                     try {
                         entry.getValue().ping();
                     } catch (Exception e) {
-                        String nome = entry.getKey();
-                        if (clientes.remove(nome) != null) {
-                            broadcast.mostrarLog("⚠️ ALERTA: O jogador " + nome + " perdeu a ligação com o servidor!");
+                        int id = entry.getKey();
+                        ClienteProxy removido = clientes.remove(id);
+                        if (removido != null) {
+                            broadcast.mostrarLog("⚠️ ALERTA: O jogador " + removido.getNome() + " perdeu a ligação com o servidor!");
                         }
                     }
                 }
@@ -43,19 +44,19 @@ public class JogoViewRemota implements IJogoView {
         this.host = host;
     }
 
-    public void adicionarCliente(String nome, IClient cliente) {
-        clientes.put(nome, new ClienteProxy(nome, cliente));
+    public void adicionarCliente(int id, String nome, IClient cliente) {
+        clientes.put(id, new ClienteProxy(nome, cliente));
     }
 
     @Override
     public int perguntarAcao(Jogador jogador) {
-        ClienteProxy proxy = clientes.get(jogador.getNome());
+        ClienteProxy proxy = clientes.get(jogador.getId());
         return proxy != null ? proxy.pedirAcao(jogador.getSaldo()) : 5;
     }
 
     @Override
     public Jogador perguntarAlvo(Jogador jogadorAtual, List<Jogador> jogadoresLista) {
-        ClienteProxy proxy = clientes.get(jogadorAtual.getNome());
+        ClienteProxy proxy = clientes.get(jogadorAtual.getId());
         if (proxy == null) return null;
 
         List<String> nomes = new ArrayList<>();
@@ -81,7 +82,13 @@ public class JogoViewRemota implements IJogoView {
     }
     
     @Override public int pedirQuantidadeJogadores() { return clientes.size(); }
-    @Override public String pedirNomeJogador(int index) { return new ArrayList<>(clientes.keySet()).get(index); }
+    
+    @Override 
+    public String pedirNomeJogador(int index) { 
+        ClienteProxy proxy = clientes.get(index);
+        return proxy != null ? proxy.getNome() : "Jogador " + index;
+    }
+    
     @Override public int perguntarOpcaoHerença() { return 2; }
     @Override public void mostrarCartas() {}
     @Override public int pedirVersaoJogo() { return 0; }
@@ -102,13 +109,13 @@ public class JogoViewRemota implements IJogoView {
     
     @Override
     public int perguntarRespostaAcao(Jogador respondente, Personagem supostoPersonagem, List<Jogador> jogadoresLista, boolean acaoPodeSerContestada, boolean acaoPodeSerBloqueada) {
-        ClienteProxy proxy = clientes.get(respondente.getNome());
+        ClienteProxy proxy = clientes.get(respondente.getId());
         return proxy != null ? proxy.pedirRespostaReacao(acaoPodeSerContestada, acaoPodeSerBloqueada) : 2;
     }
     
     @Override
     public Carta pedirCartaParaDescarte(Jogador jogador) {
-        ClienteProxy proxy = clientes.get(jogador.getNome());
+        ClienteProxy proxy = clientes.get(jogador.getId());
         List<String> nomesCartas = new ArrayList<>();
         List<Carta> cartasAtivas = new ArrayList<>();
 
@@ -127,7 +134,7 @@ public class JogoViewRemota implements IJogoView {
     
     @Override
     public void atualizarCartas(Jogador jogador) {
-        ClienteProxy proxy = clientes.get(jogador.getNome());
+        ClienteProxy proxy = clientes.get(jogador.getId());
         if (proxy != null) {
             List<String> nomesCartas = new ArrayList<>();
             for (Carta c : jogador.getJogadorCartas().getCartas()) {
@@ -139,13 +146,13 @@ public class JogoViewRemota implements IJogoView {
 
     @Override
     public int pedirHabilidadeInquisidor(Jogador jogador) {
-        ClienteProxy proxy = clientes.get(jogador.getNome());
+        ClienteProxy proxy = clientes.get(jogador.getId());
         return proxy != null ? proxy.pedirHabilidadeInquisidor() : 1;
     } 
 
     @Override
     public Carta pedirCartaParaMostrar(Jogador jogador) {
-        ClienteProxy proxy = clientes.get(jogador.getNome());
+        ClienteProxy proxy = clientes.get(jogador.getId());
         List<String> nomesCartas = new ArrayList<>();
         List<Carta> cartasAtivas = new ArrayList<>();
         
@@ -164,7 +171,7 @@ public class JogoViewRemota implements IJogoView {
 
     @Override
     public boolean decidirTrocaInquisidor(Jogador inquisidor, Carta cartaMostrada) {
-        ClienteProxy proxy = clientes.get(inquisidor.getNome());
+        ClienteProxy proxy = clientes.get(inquisidor.getId());
         if (proxy != null) {
             int escolha = proxy.decidirDestinoCartaEspionada(cartaMostrada.getPersonagem().getNome().toString());
             return escolha == 1;
@@ -174,7 +181,7 @@ public class JogoViewRemota implements IJogoView {
 
     @Override
     public Carta pedirDescarteEmbaixador(Jogador jogador) {
-        ClienteProxy proxy = clientes.get(jogador.getNome());
+        ClienteProxy proxy = clientes.get(jogador.getId());
         List<String> nomesCartas = new ArrayList<>();
         List<Carta> cartasAtivas = new ArrayList<>();
 
@@ -193,7 +200,7 @@ public class JogoViewRemota implements IJogoView {
     
     @Override
     public PersonagensNomes perguntarPersonagemBloqueio(Jogador bloqueador, List<PersonagensNomes> personagensValidos) {
-        ClienteProxy proxy = clientes.get(bloqueador.getNome());
+        ClienteProxy proxy = clientes.get(bloqueador.getId());
         List<String> nomes = personagensValidos.stream().map(Enum::toString).collect(Collectors.toList());
         
         if (proxy != null) {
@@ -215,13 +222,13 @@ public class JogoViewRemota implements IJogoView {
 
     @Override
     public void mostrarLogPrivado(Jogador destinatario, String mensagem) {
-        ClienteProxy proxy = clientes.get(destinatario.getNome());
+        ClienteProxy proxy = clientes.get(destinatario.getId());
         if (proxy != null) proxy.receberLogPrivado(mensagem);
     }
 
     @Override
     public boolean perguntarForcaExame(Jogador inquisidor) {
-        ClienteProxy proxy = clientes.get(inquisidor.getNome());
+        ClienteProxy proxy = clientes.get(inquisidor.getId());
         return proxy != null && proxy.pedirRespostaReacao(true, false) == 1;
     }
 

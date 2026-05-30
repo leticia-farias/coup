@@ -32,7 +32,7 @@ public class JogoServidor extends UnicastRemoteObject implements IJogoServidor {
             viewRemota.setHost(cliente); // NOVO
         }
 
-        viewRemota.adicionarCliente(nomeJogador, cliente);
+        viewRemota.adicionarCliente(jogadoresConectados, nomeJogador, cliente);
         jogadoresConectados++;
         viewRemota.mostrarLog(nomeJogador + " entrou no lobby. (" + jogadoresConectados + "/" + numJogadoresAlvo + ")");
 

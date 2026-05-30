@@ -11,6 +11,8 @@ public class ClienteProxy {
         this.nome = nome;
         this.client = client;
     }
+    
+    public String getNome() { return nome; }
 
     public IClient getClient() { return client; }
 
