@@ -2,6 +2,9 @@ package coup.acoes;
 
 import java.util.List;
 
+import coup.estadoJogo.AguardandoAcao;
+import coup.estadoJogo.ContextoJogo;
+import coup.estadoJogo.IEstadoJogo;
 import coup.model.Jogador;
 import coup.model.PersonagensNomes;
 
@@ -21,4 +24,8 @@ public interface Acao {
 
 	    PersonagensNomes getPersonagemNecessario();
 
+	 // Método padrão: a maioria das ações volta para AguardandoAcao
+	    default IEstadoJogo proximoEstado(ContextoJogo contexto) {
+	        return new AguardandoAcao(contexto);
+	    }
 }

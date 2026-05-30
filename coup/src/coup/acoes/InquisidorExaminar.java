@@ -17,4 +17,9 @@ public class InquisidorExaminar implements Acao {
         // Toda a lógica fica no estado AguardandoDecisaoInquisidor,
         // pois requer interação com a view (exibir carta privada, perguntar força)
     }
+    
+    @Override
+    public coup.estadoJogo.IEstadoJogo proximoEstado(coup.estadoJogo.ContextoJogo contexto) {
+        return new coup.estadoJogo.AguardandoDecisaoInquisidor(contexto, contexto.getJogadorAutor(), contexto.getJogadorAlvo());
+    }
 }

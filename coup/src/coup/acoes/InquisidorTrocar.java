@@ -17,4 +17,10 @@ public class InquisidorTrocar implements Acao {
         // A lógica de compra e devolução fica no estado AguardandoTrocaInquisidor
         // executar() é chamado apenas para confirmar que a ação passou sem contestação
     }
+    
+    @Override
+    public coup.estadoJogo.IEstadoJogo proximoEstado(coup.estadoJogo.ContextoJogo contexto) {
+        contexto.getJogadorAutor().getJogadorCartas().getCartas().add(contexto.getBaralho().comprarCarta());
+        return new coup.estadoJogo.AguardandoTrocaInquisidor(contexto, contexto.getJogadorAutor(), contexto.getBaralho());
+    }
 }

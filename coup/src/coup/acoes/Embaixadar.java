@@ -50,4 +50,9 @@ public class Embaixadar implements Acao {
 	public List<PersonagensNomes> getPersonagensBloquadores() {
 		return List.of();
 	}
+	
+	@Override
+	public coup.estadoJogo.IEstadoJogo proximoEstado(coup.estadoJogo.ContextoJogo contexto) {
+	    return new coup.estadoJogo.AguardandoTrocaEmbaixador(contexto, contexto.getJogadorAutor(), contexto.getBaralho());
+	}
 }

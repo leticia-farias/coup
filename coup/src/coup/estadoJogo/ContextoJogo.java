@@ -28,27 +28,9 @@ public class ContextoJogo {
 
         if (this.aceites >= totalJogadoresAtivos - 1) {
             acaoPendente.executar(jogadorAutor, jogadorAlvo);
-
-            if (acaoPendente instanceof coup.acoes.Assassinar) {
-                setEstado(new AguardandoDescarte(this, jogadorAlvo, false));
-
-            } else if (acaoPendente instanceof coup.acoes.Golpear) {
-                setEstado(new AguardandoDescarte(this, jogadorAlvo, false));
-
-            } else if (acaoPendente instanceof coup.acoes.Embaixadar) {
-                setEstado(new AguardandoTrocaEmbaixador(this, jogadorAutor, baralho));
-
-            } else if (acaoPendente instanceof coup.acoes.InquisidorTrocar) {
-                // Compra 1 carta antes de entrar no estado de troca
-                jogadorAutor.getJogadorCartas().getCartas().add(baralho.comprarCarta());
-                setEstado(new AguardandoTrocaInquisidor(this, jogadorAutor, baralho));
-
-            } else if (acaoPendente instanceof coup.acoes.InquisidorExaminar) {
-                setEstado(new AguardandoDecisaoInquisidor(this, jogadorAutor, jogadorAlvo));
-
-            } else {
-                setEstado(new AguardandoAcao(this));
-            }
+            
+            // O próximo estado é definido pela própria ação
+            setEstado(acaoPendente.proximoEstado(this));
         }
     }
     

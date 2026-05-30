@@ -45,4 +45,9 @@ public class Assassinar implements Acao {
     public List<PersonagensNomes> getPersonagensBloquadores() {
         return List.of(PersonagensNomes.CONDESSA);
     }
+    
+    @Override
+    public coup.estadoJogo.IEstadoJogo proximoEstado(coup.estadoJogo.ContextoJogo contexto) {
+        return new coup.estadoJogo.AguardandoDescarte(contexto, contexto.getJogadorAlvo(), false);
+    }
 }
