@@ -156,4 +156,18 @@ public class Cliente extends UnicastRemoteObject implements IClient {
             tela.atualizarSuasCartas(minhasCartasAtuais);
         }
     }
+    
+    @Override
+    public int pedirEscolhaMenu(String titulo, List<String> opcoes) throws RemoteException {
+        System.out.println("\n--- " + titulo + " ---");
+        for (int i = 0; i < opcoes.size(); i++) {
+            System.out.println((i + 1) + " - " + opcoes.get(i));
+        }
+        System.out.print("Escolha: ");
+        int escolha;
+        do {
+            escolha = sc.nextInt();
+        } while (escolha < 1 || escolha > opcoes.size());
+        return escolha - 1; // retorna índice base 0
+    }
 }

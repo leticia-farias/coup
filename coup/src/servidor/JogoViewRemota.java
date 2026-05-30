@@ -5,14 +5,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import coup.model.Carta;
 import coup.model.Jogador;
 import coup.model.Personagem;
+import coup.model.PersonagensNomes;
 import coup.view.IJogoView;
 import cliente.IClient;
 
 public class JogoViewRemota implements IJogoView {
 
     private final Map<String, IClient> clientes = new HashMap<>();
+    private IClient host = null; 
+    
+    public void setHost(IClient host) {
+    	this.host = host;
+    }
 
     public void adicionarCliente(String nome, IClient cliente) {
         clientes.put(nome, cliente);
@@ -98,7 +106,24 @@ public class JogoViewRemota implements IJogoView {
     // Métodos de configuração inicial podem ser fixados ou tratados no setup do Servidor
     @Override public int pedirQuantidadeJogadores() { return clientes.size(); }
     @Override public String pedirNomeJogador(int index) { return new ArrayList<>(clientes.keySet()).get(index); }
-    //@Override public int perguntarModo() { return 1; }
+    @Override
+    public int perguntarModo() {
+        if (host == null) return 1; // fallback seguro
+
+        try {
+            int escolha = host.pedirEscolhaMenu(
+                "Versão do jogo",
+                List.of("Original (com Embaixador)", "Com Inquisidor")
+            );
+            // escolha é base 0 → retorna 1 ou 2 para o controller
+            int versao = escolha + 1;
+            mostrarLog("Versão escolhida pelo host: " + (versao == 1 ? "Embaixador" : "Inquisidor"));
+            return versao;
+        } catch (RemoteException e) {
+            mostrarLog("Host desconectado ao escolher versão. Usando versão padrão (Embaixador).");
+            return 1;
+        }
+    }
     @Override public int perguntarOpcaoHerença() { return 2; }
     @Override public void mostrarCartas() {}
 
@@ -239,17 +264,122 @@ public class JogoViewRemota implements IJogoView {
         }
     }
 
-    @Override
-    public void pedirAcao() {
-        // TODO Auto-generated method stub
-        
-    }
-    
-    @Override
-    public coup.model.Carta pedirDescarteEmbaixador(Jogador jogador) {
-        // TODO: Implementar a chamada RMI para o Embaixador futuramente
-        return null;
-    }
+	@Override
+	public void pedirAcao() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public Carta pedirDescarteEmbaixador(Jogador jogador) {
+	    try {
+	        IClient client = clientes.get(jogador.getNome());
+
+	        List<String> nomesCartas = new ArrayList<>();
+	        List<Carta> cartasAtivas = new ArrayList<>();
+
+	        for (Carta c : jogador.getJogadorCartas().getCartas()) {
+	            if (c.isStatusAtiva()) {
+	                nomesCartas.add(c.getPersonagem().getNome().toString());
+	                cartasAtivas.add(c);
+	            }
+	        }
+
+	        // Reutilizamos pedirDescarte — a diferença semântica fica na mensagem enviada
+	        // Para distinguir no cliente, você pode criar um método pedirDescarteEmbaixador
+	        // na interface IClient futuramente. Por ora, reutilizar é seguro.
+	        int indexEscolhido = client.pedirDescarte(
+	            jogador.getNome() + " (Embaixador - devolva ao baralho)", nomesCartas
+	        );
+
+	        if (indexEscolhido < 0 || indexEscolhido >= cartasAtivas.size()) {
+	            indexEscolhido = 0;
+	        }
+
+	        return cartasAtivas.get(indexEscolhido);
+
+	    } catch (RemoteException e) {
+	        System.err.println("Erro ao contactar " + jogador.getNome() + " para troca do Embaixador.");
+	        // Fallback: devolve a última carta ativa
+	        for (int i = jogador.getJogadorCartas().getCartas().size() - 1; i >= 0; i--) {
+	            if (jogador.getJogadorCartas().getCartas().get(i).isStatusAtiva()) {
+	                return jogador.getJogadorCartas().getCartas().get(i);
+	            }
+	        }
+	    }
+	    return null;
+	}
+	
+	@Override
+	public PersonagensNomes perguntarPersonagemBloqueio(Jogador bloqueador, List<PersonagensNomes> personagensValidos) {
+	    try {
+	        IClient client = clientes.get(bloqueador.getNome());
+
+	        // Converte enum para string para enviar ao cliente
+	        List<String> nomes = personagensValidos.stream()
+	                .map(Enum::toString)
+	                .collect(java.util.stream.Collectors.toList());
+
+	        // Reutiliza pedirAlvo — semanticamente diferente, mas evita mudar IClient agora
+	        String escolha = client.pedirAlvo(
+	            bloqueador.getNome() + " - escolha o personagem bloqueador", nomes
+	        );
+
+	        return PersonagensNomes.valueOf(escolha);
+
+	    } catch (RemoteException e) {
+	        System.err.println("Erro ao contactar " + bloqueador.getNome() + " para bloqueio.");
+	        return personagensValidos.get(0); // fallback: primeiro personagem válido
+	    }
+	}
+	
+	@Override
+	public int perguntarAcaoComInquisidor(Jogador jogador) {
+	    // Reutiliza pedirAcao — o cliente já mostrará opção 8 se recebermos um flag
+	    // Por ora o fallback é o mesmo que perguntarAcao
+	    return perguntarAcao(jogador);
+	}
+
+	@Override
+	public Carta pedirCartaParaRevelar(Jogador alvo) {
+	    try {
+	        IClient client = clientes.get(alvo.getNome());
+	        List<String> nomes = new ArrayList<>();
+	        List<Carta> cartasAtivas = new ArrayList<>();
+	        for (Carta c : alvo.getJogadorCartas().getCartas()) {
+	            if (c.isStatusAtiva()) { nomes.add(c.getPersonagem().getNome().toString()); cartasAtivas.add(c); }
+	        }
+	        int idx = client.pedirDescarte(alvo.getNome() + " (Inquisidor - escolha qual carta revelar)", nomes);
+	        if (idx < 0 || idx >= cartasAtivas.size()) idx = 0;
+	        return cartasAtivas.get(idx);
+	    } catch (RemoteException e) {
+	        for (Carta c : alvo.getJogadorCartas().getCartas()) if (c.isStatusAtiva()) return c;
+	    }
+	    return null;
+	}
+
+	@Override
+	public void mostrarCartaPrivada(Jogador destinatario, Carta carta) {
+	    try {
+	        // Mensagem privada: envia SOMENTE para o cliente do inquisidor
+	        IClient client = clientes.get(destinatario.getNome());
+	        client.receberLog("[PRIVADO] Carta examinada: " + carta.getPersonagem().getNome());
+	    } catch (RemoteException e) {
+	        System.err.println("Erro ao enviar carta privada para " + destinatario.getNome());
+	    }
+	}
+
+	@Override
+	public boolean perguntarForcaExame(Jogador inquisidor) {
+	    try {
+	        IClient client = clientes.get(inquisidor.getNome());
+	        // 1 = contestar (reaproveitamos semântica: 1 = sim, 2 = não)
+	        int resp = client.pedirRespostaReacao("Inquisidor", true, false);
+	        return resp == 1;
+	    } catch (RemoteException e) {
+	        return false; // fallback: não força
+	    }
+	}
 
     // Metodo que permite ao servidor varrer todos os jogadores e forçar o envio das cartas para cada um deles
     public void sincronizarCartasIniciais(List<Jogador> todosJogadores) {

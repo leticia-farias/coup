@@ -1,5 +1,7 @@
 package coup.acoes;
 
+import java.util.List;
+
 import coup.model.Jogador;
 import coup.model.PersonagensNomes;
 
@@ -37,5 +39,10 @@ public class Assassinar implements Acao {
             
             System.out.println(autor.getNome() + " pagou 3 moedas para assassinar " + alvo.getNome() + ".");
         }
+    }
+    
+    @Override
+    public List<PersonagensNomes> getPersonagensBloquadores() {
+        return List.of(PersonagensNomes.CONDESSA);
     }
 }

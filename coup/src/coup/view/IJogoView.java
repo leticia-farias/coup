@@ -5,15 +5,16 @@ import java.util.List;
 import coup.model.Carta;
 import coup.model.Jogador;
 import coup.model.Personagem;
+import coup.model.PersonagensNomes;
 
 public interface IJogoView {
 	
-	public int pedirQuantidadeJogadores();
-	public String pedirNomeJogador(int index);
-	public int pedirVersaoJogo();
-	public int perguntarAcao(Jogador jogador);
+	int pedirQuantidadeJogadores();
+	String pedirNomeJogador(int index);
+	int pedirVersaoJogo();
+	int perguntarAcao(Jogador jogador);
 	
-	public int perguntarRespostaAcao(
+	int perguntarRespostaAcao(
             Jogador jogadorAutor,
             Personagem supostoPersonagem,
             List<Jogador> jogadoresLista,
@@ -21,18 +22,25 @@ public interface IJogoView {
             boolean acaoPodeSerBloqueada
     );
 	
-	public Jogador perguntarAlvo(Jogador jogadorAtual, List<Jogador> jogadoresLista);
+	Jogador perguntarAlvo(Jogador jogadorAtual, List<Jogador> jogadoresLista);
 	
-	public void mostrarCartas();
-	public void pedirAcao();
-	public void mostrarLog(String mensagem);
+	void mostrarCartas();
+	void pedirAcao();
+	void mostrarLog(String mensagem);
 
-	public int perguntarModo();
-	public int perguntarOpcaoHerença();
-	public Carta pedirDescarteEmbaixador(Jogador jogador);
-	public Carta pedirCartaParaDescarte(Jogador jogador);
+	int perguntarModo();
+	int perguntarOpcaoHerença();
+	Carta pedirDescarteEmbaixador(Jogador jogador);
+	Carta pedirCartaParaDescarte(Jogador jogador);
 	
-	public void mostrarSaldos(List<Jogador> jogadoresList);
+	void mostrarSaldos(List<Jogador> jogadoresList);
+	
+	PersonagensNomes perguntarPersonagemBloqueio(Jogador bloqueador, List<PersonagensNomes> personagensValidos);
+	
+	int    perguntarAcaoComInquisidor(Jogador jogador);
+	Carta  pedirCartaParaRevelar(Jogador alvo);               // alvo escolhe qual mostrar
+	void   mostrarCartaPrivada(Jogador destinatario, Carta carta); // só o inquisidor vê
+	boolean perguntarForcaExame(Jogador inquisidor);          // forçar troca ou não?
 	
 	// novos metodos do inquisidor
 	public int pedirHabilidadeInquisidor(Jogador jogador);

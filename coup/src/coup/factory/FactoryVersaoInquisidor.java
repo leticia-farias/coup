@@ -12,7 +12,7 @@ import coup.acoes.Receitar;
 import coup.model.Baralho;
 
 public class FactoryVersaoInquisidor implements IJogoFactory {
-	
+
 	@Override
 	public Acao acoes(int opcao, Baralho baralho) {
 		Acao acao = null;

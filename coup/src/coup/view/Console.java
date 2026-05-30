@@ -6,6 +6,7 @@ import java.util.Scanner;
 import coup.model.Carta;
 import coup.model.Jogador;
 import coup.model.Personagem;
+import coup.model.PersonagensNomes;
 
 public class Console implements IJogoView {
 
@@ -77,11 +78,6 @@ public class Console implements IJogoView {
 		separarMensagens();
 
 		int saldoJogador = jogador.getSaldo();
-
-		if (saldoJogador >= 10) {
-			informarGolpe(jogador);
-			return 7;
-		}
 
 		System.out.println("1 - Imposto (Duque)");
 		System.out.println("2 - Roubar (Capitão)");
@@ -314,8 +310,58 @@ public class Console implements IJogoView {
 
 	@Override
 	public Carta pedirDescarteEmbaixador(Jogador jogador) {
-		// TODO Auto-generated method stub
-		return null;
+	    separarMensagens();
+	    System.out.println(jogador.getNome() + ", você comprou 2 cartas do baralho.");
+	    System.out.println("Escolha uma carta para DEVOLVER ao baralho:");
+
+	    List<Carta> cartasAtivas = jogador.getJogadorCartas().getCartas().stream()
+	            .filter(Carta::isStatusAtiva)
+	            .collect(java.util.stream.Collectors.toList());
+
+	    for (int i = 0; i < cartasAtivas.size(); i++) {
+	        System.out.println(i + " - " + cartasAtivas.get(i).getPersonagem().getNome());
+	    }
+
+	    int index;
+	    do {
+	        index = lerInteiro();
+	    } while (index < 0 || index >= cartasAtivas.size());
+
+	    return cartasAtivas.get(index);
+	}
+
+	
+	@Override
+	public PersonagensNomes perguntarPersonagemBloqueio(Jogador bloqueador, List<PersonagensNomes> personagensValidos) {
+	    separarMensagens();
+	    System.out.println(bloqueador.getNome() + ", com qual personagem você está bloqueando?");
+
+	    for (int i = 0; i < personagensValidos.size(); i++) {
+	        System.out.println(i + " - " + personagensValidos.get(i));
+	    }
+
+	    int index;
+	    do {
+	        index = lerInteiro();
+	    } while (index < 0 || index >= personagensValidos.size());
+
+	    return personagensValidos.get(index);
+	}
+	
+	@Override
+	public int perguntarAcaoComInquisidor(Jogador jogador) {
+	    separarMensagens();
+	    int saldo = jogador.getSaldo();
+	    System.out.println("1 - Imposto (Duque)");
+	    System.out.println("2 - Roubar (Capitão)");
+	    System.out.println("3 - Trocar (Inquisidor)");
+	    System.out.println("4 - Ajuda externa");
+	    System.out.println("5 - Pedir renda");
+	    System.out.println("8 - Examinar (Inquisidor)");
+	    if (saldo >= 3) System.out.println("6 - Assassinar (Assassino)");
+	    if (saldo >= 7) System.out.println("7 - Golpe de estado");
+	    System.out.println(jogador.getNome() + ", digite o número da ação:");
+	    return lerInteiro();
 	}
 
 	@Override
@@ -331,5 +377,43 @@ public class Console implements IJogoView {
 	@Override
 	public boolean decidirTrocaInquisidor(Jogador inquisidor, Carta cartaMostrada) { 
 		return false; 
+	}
+	@Override
+	public Carta pedirCartaParaRevelar(Jogador alvo) {
+	    separarMensagens();
+	    System.out.println(alvo.getNome() + ", o Inquisidor vai examinar uma de suas cartas.");
+	    System.out.println("Escolha qual carta mostrar:");
+
+	    List<Carta> cartasAtivas = alvo.getJogadorCartas().getCartas().stream()
+	            .filter(Carta::isStatusAtiva)
+	            .collect(java.util.stream.Collectors.toList());
+
+	    for (int i = 0; i < cartasAtivas.size(); i++) {
+	        System.out.println(i + " - " + cartasAtivas.get(i).getPersonagem().getNome());
+	    }
+
+	    int index;
+	    do { index = lerInteiro(); } while (index < 0 || index >= cartasAtivas.size());
+	    return cartasAtivas.get(index);
+	}
+
+	@Override
+	public void mostrarCartaPrivada(Jogador destinatario, Carta carta) {
+	    separarMensagens();
+	    // No console local todo mundo vê a tela — o ideal seria limpar o terminal
+	    // e pedir para o destinatário assumir o teclado. Por ora exibimos e pausamos.
+	    System.out.println("[SOMENTE " + destinatario.getNome().toUpperCase() + " DEVE LER]");
+	    System.out.println("Carta examinada: " + carta.getPersonagem().getNome());
+	    System.out.println("Pressione Enter para continuar...");
+	    sc.nextLine(); // limpa o \n pendente do nextInt anterior
+	    sc.nextLine(); // aguarda Enter
+	}
+
+	@Override
+	public boolean perguntarForcaExame(Jogador inquisidor) {
+	    separarMensagens();
+	    System.out.println(inquisidor.getNome() + ", deseja forçar a troca da carta examinada?");
+	    System.out.println("1 - SIM  |  2 - NÃO");
+	    return lerInteiro() == 1;
 	}
 }

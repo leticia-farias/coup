@@ -1,5 +1,7 @@
 package coup.estadoJogo;
 
+import java.util.List;
+
 import coup.acoes.Acao;
 import coup.model.Carta;
 import coup.model.Jogador;
@@ -25,12 +27,19 @@ public class ResolvendoContestacao implements IEstadoJogo {
 	            .anyMatch(c -> c.isStatusAtiva() && c.getPersonagem().getNome() == personagemContestado);
 
 	    if (temCarta) {
-	        // O autor TEM a carta. O contestador mentiu/errou e perde a carta.
-	        // Ação original continua (cancelarAcaoOriginal = false)
+	        // Contestador errou — perde carta, ação original continua
 	        contexto.setEstado(new AguardandoDescarte(contexto, contestador, false));
 	    } else {
-	        // O autor NÃO TEM a carta. O autor perde a carta.
-	        // Ação original é cancelada (cancelarAcaoOriginal = true)
+	        // Contestado não tinha a carta — perde carta, ação cancelada
+	        // Se era Embaixador, devolve as cartas extras ao baralho antes de cancelar
+	        if (personagemContestado == coup.model.PersonagensNomes.EMBAIXADOR) {
+	            List<Carta> cartas = contestado.getJogadorCartas().getCartas();
+	            // Remove as últimas 2 cartas adicionadas (as que vieram do baralho)
+	            while (cartas.size() > 2) {
+	                Carta extra = cartas.remove(cartas.size() - 1);
+	                contexto.getBaralho().devolverCarta(extra);
+	            }
+	        }
 	        contexto.setEstado(new AguardandoDescarte(contexto, contestado, true));
 	    }
 	}

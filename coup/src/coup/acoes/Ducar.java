@@ -1,4 +1,6 @@
 package coup.acoes;
+import java.util.List;
+
 import coup.model.Jogador;
 import coup.model.PersonagensNomes;
 
@@ -13,5 +15,10 @@ public class Ducar implements Acao {
     public void executar(Jogador autor, Jogador alvo) {
         // Apenas a regra de negócio
         autor.setSaldo(autor.getSaldo() + 3); 
+    }
+    
+    @Override
+    public List<PersonagensNomes> getPersonagensBloquadores() {
+        return List.of();
     }
 }

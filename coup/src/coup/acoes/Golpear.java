@@ -1,4 +1,6 @@
 package coup.acoes;
+import java.util.List;
+
 import coup.model.Jogador;
 import coup.model.PersonagensNomes;
 
@@ -16,5 +18,10 @@ public class Golpear implements Acao {
             // Aqui o golpe foi validado. O descarte em si ocorrerá na máquina de estados 
             // (que vai pedir a carta para o alvo usando a View).
         }
+    }
+    
+    @Override
+    public List<PersonagensNomes> getPersonagensBloquadores() {
+        return List.of();
     }
 }
