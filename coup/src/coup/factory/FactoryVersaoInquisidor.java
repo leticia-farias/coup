@@ -7,7 +7,7 @@ import coup.acoes.Capitar;
 import coup.acoes.Ducar;
 import coup.acoes.Golpear;
 import coup.acoes.InquisidarEspionar;
-import coup.acoes.InquisidarTrocar;
+import coup.acoes.InquisidorTrocar;
 import coup.acoes.Receitar;
 import coup.model.Baralho;
 
@@ -24,7 +24,7 @@ public class FactoryVersaoInquisidor implements IJogoFactory {
 			acao = new Capitar();
 			break;
 		case 3:
-			acao = new InquisidarTrocar(baralho);
+			acao = new InquisidorTrocar();
 			break;
 		case 4:
 			acao = new Ajudar();
