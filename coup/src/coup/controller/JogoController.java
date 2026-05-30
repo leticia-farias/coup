@@ -3,6 +3,8 @@ package coup.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import coup.acoes.Acao;
 import coup.acoes.Golpear;
@@ -29,6 +31,9 @@ public class JogoController {
 	private Baralho baralho = new Baralho();
 	
 	private int indexJogadorAtual = -1;
+	
+	// pool fixo número máximo de jogadores padrão 
+	private final ExecutorService ioPool = Executors.newFixedThreadPool(6);
 	
 	public JogoController(IJogoView view) {
 		this.view = view;
@@ -201,7 +206,7 @@ private void processarTurno(Jogador jogadorAtual) {
                             }
                         }
                     }
-                });
+                }, ioPool);
                 futuros.add(futuro);
             }
 
