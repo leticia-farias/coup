@@ -22,15 +22,16 @@ public class AguardandoDescarte implements IEstadoJogo {
 
 	@Override
 	public void descartarCarta(Carta cartaEscolhida) {
-		cartaEscolhida.setStatusAtiva(false);
-		jogadorQueDescarta.atualizarStatus();
+		// Passo 15 resolvido: usamos o método centralizado no modelo do Jogador
+		jogadorQueDescarta.perderCarta(cartaEscolhida);
 		
+		// Passo 14 resolvido: delegamos o fluxo de volta para o controlador/contexto
 		if(cancelarAcaoOriginal) {
-			// fim do turno 
+			// Fim do turno (ex: autor da ação perdeu a contestação)
 			contexto.setEstado(new AguardandoAcao(contexto));
 		} else {
-			contexto.getAcaoPendente().executar(contexto.getJogadorAutor(), contexto.getJogadorAlvo());
-			contexto.setEstado(new AguardandoAcao(contexto));
+			// A ação segue o seu rumo natural (ex: alvo perdeu a contestação)
+			contexto.executarAcaoPendente();
 		}
 	}
 

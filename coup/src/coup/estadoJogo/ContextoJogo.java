@@ -34,6 +34,13 @@ public class ContextoJogo {
         }
     }
     
+    public void executarAcaoPendente() {
+        if (acaoPendente != null) {
+            acaoPendente.executar(jogadorAutor, jogadorAlvo);
+            setEstado(acaoPendente.proximoEstado(this));
+        }
+    }
+    
     // Getters e Setters
     public IEstadoJogo getEstado() { return estado; }
     public void setEstado(IEstadoJogo estado) { this.estado = estado; }
