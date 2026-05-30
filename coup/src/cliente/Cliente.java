@@ -159,15 +159,15 @@ public class Cliente extends UnicastRemoteObject implements IClient {
     
     @Override
     public int pedirEscolhaMenu(String titulo, List<String> opcoes) throws RemoteException {
-        System.out.println("\n--- " + titulo + " ---");
-        for (int i = 0; i < opcoes.size(); i++) {
-            System.out.println((i + 1) + " - " + opcoes.get(i));
-        }
-        System.out.print("Escolha: ");
-        int escolha;
-        do {
-            escolha = sc.nextInt();
-        } while (escolha < 1 || escolha > opcoes.size());
-        return escolha - 1; // retorna índice base 0
+        String escolhaStr = (String) JOptionPane.showInputDialog(tela,
+                titulo,
+                "Opções do Jogo", 
+                JOptionPane.QUESTION_MESSAGE, 
+                null, 
+                opcoes.toArray(), 
+                opcoes.get(0));
+                
+        if (escolhaStr == null) return 0; // Retorna a primeira opção como fallback seguro
+        return opcoes.indexOf(escolhaStr);
     }
 }
