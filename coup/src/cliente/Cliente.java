@@ -172,4 +172,9 @@ public class Cliente extends UnicastRemoteObject implements IClient, Serializabl
         if (escolhaStr == null) return 0; // Retorna a primeira opção como fallback seguro
         return opcoes.indexOf(escolhaStr);
     }
+    
+    @Override
+    public void ping() throws RemoteException {
+        // Método vazio intencionalmente. Serve apenas para o servidor testar se a ligação está viva.
+    }
 }

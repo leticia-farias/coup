@@ -18,6 +18,28 @@ public class JogoViewRemota implements IJogoView {
     private final Map<String, IClient> clientes = new ConcurrentHashMap<>();
     private IClient host = null; 
     
+    public JogoViewRemota() {
+        Thread heartbeat = new Thread(() -> {
+            while (true) {
+                try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+                
+                for (Map.Entry<String, IClient> entry : clientes.entrySet()) {
+                    try {
+                        entry.getValue().ping();
+                    } catch (RemoteException e) {
+                        String nome = entry.getKey();
+                        // Remove o cliente e avisa todos os outros se ele caiu
+                        if (clientes.remove(nome) != null) {
+                            mostrarLog("⚠️ ALERTA: O jogador " + nome + " perdeu a ligação com o servidor!");
+                        }
+                    }
+                }
+            }
+        });
+        heartbeat.setDaemon(true);
+        heartbeat.start();
+    }
+    
     public void setHost(IClient host) {
     	this.host = host;
     }
@@ -31,7 +53,7 @@ public class JogoViewRemota implements IJogoView {
         try {
             IClient client = clientes.get(jogador.getNome());
             return client.pedirAcao(jogador.getNome(), jogador.getSaldo());
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return 5; // Retorna Renda como fallback em caso de erro de rede
         }
@@ -51,7 +73,7 @@ public class JogoViewRemota implements IJogoView {
             for (Jogador j : jogadoresLista) {
                 if (j.getNome().equalsIgnoreCase(nomeEscolhido)) return j;
             }
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -63,7 +85,7 @@ public class JogoViewRemota implements IJogoView {
         for (IClient client : clientes.values()) {
             try {
                 client.receberLog(mensagem);
-            } catch (RemoteException ignored) {}
+            } catch (Exception ignored) {}
         }
     }
 
@@ -99,7 +121,7 @@ public class JogoViewRemota implements IJogoView {
         for (IClient client : clientes.values()) {
             try {
                 client.mostrarSaldos(saldos);
-            } catch (RemoteException ignored) {}
+            } catch (Exception ignored) {}
         }
     }
     
@@ -116,7 +138,7 @@ public class JogoViewRemota implements IJogoView {
             int versao = host.pedirModoJogo();
             mostrarLog("Versão escolhida pelo host: " + (versao == 1 ? "Embaixador" : "Inquisidor"));
             return versao;
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             mostrarLog("Host desconectado ou erro de rede ao escolher versão. Usando versão padrão (Embaixador).");
             return 1; 
         }
@@ -150,7 +172,7 @@ public class JogoViewRemota implements IJogoView {
             
             // Chama a tela do cliente perguntando o que ele quer fazer
             return client.pedirRespostaReacao("um jogador", acaoPodeSerContestada, acaoPodeSerBloqueada);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             System.err.println("Erro ao contactar o cliente " + respondente.getNome());
             e.printStackTrace();
             return 2; // Em caso de erro de rede, assume "2" (Aceitar) para não travar o jogo
@@ -182,7 +204,7 @@ public class JogoViewRemota implements IJogoView {
             
             return cartasAtivas.get(indexEscolhido);
 
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             System.err.println("Erro ao contactar o cliente " + jogador.getNome() + " para descarte.");
             // Em caso de falha de rede, mata a primeira carta ativa que encontrar para o jogo não travar
             for (coup.model.Carta c : jogador.getJogadorCartas().getCartas()) {
@@ -201,7 +223,7 @@ public class JogoViewRemota implements IJogoView {
                 nomesCartas.add(c.getPersonagem().getNome().toString() + (c.isStatusAtiva() ? " (Ativa)" : " (Morta)"));
             }
             client.mostrarSuasCartas(nomesCartas);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -213,7 +235,7 @@ public class JogoViewRemota implements IJogoView {
             if (client != null) {
                 client.receberLog("[SECRETO] " + mensagem);
             }
-        } catch (RemoteException ignored) {}
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -221,7 +243,7 @@ public class JogoViewRemota implements IJogoView {
         try {
             cliente.IClient client = clientes.get(jogador.getNome());
             return client.pedirHabilidadeInquisidor();
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             System.err.println("Erro de rede ao pedir habilidade do Inquisidor para " + jogador.getNome());
             return 1; // Fallback seguro: se a rede falhar, assume a opção 1 (Trocar) para o jogo não travar
         }
@@ -249,7 +271,7 @@ public class JogoViewRemota implements IJogoView {
             }
             return cartasAtivas.get(indexEscolhido);
             
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             System.err.println("Erro de rede ao pedir carta para mostrar de " + jogador.getNome());
             // Se o cliente cair no meio do processo, retorna a primeira carta viva encontrada
             return jogador.getJogadorCartas().getCartas().stream().filter(c -> c.isStatusAtiva()).findFirst().orElse(null);
@@ -266,7 +288,7 @@ public class JogoViewRemota implements IJogoView {
             int escolha = client.decidirDestinoCartaEspionada(inquisidor.getNome(), nomeCarta);
             return escolha == 1;
             
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             System.err.println("Erro de rede na decisão do Inquisidor " + inquisidor.getNome());
             return false; // Se a conexão falhar, o alvo mantém a carta por segurança
         }
@@ -306,7 +328,7 @@ public class JogoViewRemota implements IJogoView {
 
 	        return cartasAtivas.get(indexEscolhido);
 
-	    } catch (RemoteException e) {
+	    } catch (Exception e) {
 	        System.err.println("Erro ao contactar " + jogador.getNome() + " para troca do Embaixador.");
 	        // Fallback: devolve a última carta ativa
 	        for (int i = jogador.getJogadorCartas().getCartas().size() - 1; i >= 0; i--) {
@@ -335,7 +357,7 @@ public class JogoViewRemota implements IJogoView {
 
 	        return PersonagensNomes.valueOf(escolha);
 
-	    } catch (RemoteException e) {
+	    } catch (Exception e) {
 	        System.err.println("Erro ao contactar " + bloqueador.getNome() + " para bloqueio.");
 	        return personagensValidos.get(0); // fallback: primeiro personagem válido
 	    }
@@ -360,7 +382,7 @@ public class JogoViewRemota implements IJogoView {
 	        int idx = client.pedirDescarte(alvo.getNome() + " (Inquisidor - escolha qual carta revelar)", nomes);
 	        if (idx < 0 || idx >= cartasAtivas.size()) idx = 0;
 	        return cartasAtivas.get(idx);
-	    } catch (RemoteException e) {
+	    } catch (Exception e) {
 	        for (Carta c : alvo.getJogadorCartas().getCartas()) if (c.isStatusAtiva()) return c;
 	    }
 	    return null;
@@ -372,7 +394,7 @@ public class JogoViewRemota implements IJogoView {
 	        // Mensagem privada: envia SOMENTE para o cliente do inquisidor
 	        IClient client = clientes.get(destinatario.getNome());
 	        client.receberLog("[PRIVADO] Carta examinada: " + carta.getPersonagem().getNome());
-	    } catch (RemoteException e) {
+	    } catch (Exception e) {
 	        System.err.println("Erro ao enviar carta privada para " + destinatario.getNome());
 	    }
 	}
@@ -384,7 +406,7 @@ public class JogoViewRemota implements IJogoView {
 	        // 1 = contestar (reaproveitamos semântica: 1 = sim, 2 = não)
 	        int resp = client.pedirRespostaReacao("Inquisidor", true, false);
 	        return resp == 1;
-	    } catch (RemoteException e) {
+	    } catch (Exception e) {
 	        return false; // fallback: não força
 	    }
 	}

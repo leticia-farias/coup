@@ -27,4 +27,6 @@ public interface IClient extends Remote {
     int pedirHabilidadeInquisidor() throws RemoteException;
     int pedirModoJogo() throws RemoteException;
     void sincronizarEstado() throws RemoteException;
+    
+    void ping() throws RemoteException;
 }
