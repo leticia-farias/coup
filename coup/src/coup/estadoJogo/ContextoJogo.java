@@ -23,7 +23,7 @@ public class ContextoJogo {
         this.baralho = baralho;
     }
 
-    public void registrarAceites() {
+    public synchronized void registrarAceites() {
         this.aceites++;
 
         if (this.aceites >= totalJogadoresAtivos - 1) {
