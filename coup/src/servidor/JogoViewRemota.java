@@ -108,37 +108,34 @@ public class JogoViewRemota implements IJogoView {
     @Override public String pedirNomeJogador(int index) { return new ArrayList<>(clientes.keySet()).get(index); }
     @Override
     public int perguntarModo() {
-        if (host == null) return 1; // fallback seguro
+        if (host == null) {
+            return 1; // Fallback seguro caso o host não esteja definido
+        }
 
         try {
-            int escolha = host.pedirEscolhaMenu(
-                "Versão do jogo",
-                List.of("Original (com Embaixador)", "Com Inquisidor")
-            );
-            // escolha é base 0 → retorna 1 ou 2 para o controller
-            int versao = escolha + 1;
+            int versao = host.pedirModoJogo();
             mostrarLog("Versão escolhida pelo host: " + (versao == 1 ? "Embaixador" : "Inquisidor"));
             return versao;
         } catch (RemoteException e) {
-            mostrarLog("Host desconectado ao escolher versão. Usando versão padrão (Embaixador).");
-            return 1;
+            mostrarLog("Host desconectado ou erro de rede ao escolher versão. Usando versão padrão (Embaixador).");
+            return 1; 
         }
     }
     @Override public int perguntarOpcaoHerença() { return 2; }
     @Override public void mostrarCartas() {}
 
-    @Override 
-    public int perguntarModo() { 
-        try {
-            // Pega o primeiro jogador da lista (O Host que criou a sala)
-            String nomeHost = new ArrayList<>(clientes.keySet()).get(0);
-            IClient host = clientes.get(nomeHost);
-            return host.pedirModoJogo();
-        } catch (Exception e) {
-            System.err.println("Erro de rede ao perguntar o modo de jogo ao host. Usando modo padrão (1).");
-            return 1; // Se der erro de rede, assume a versão original para não quebrar
-        }
-    }
+//    @Override 
+//    public int perguntarModo() { 
+//        try {
+//            // Pega o primeiro jogador da lista (O Host que criou a sala)
+//            String nomeHost = new ArrayList<>(clientes.keySet()).get(0);
+//            IClient host = clientes.get(nomeHost);
+//            return host.pedirModoJogo();
+//        } catch (Exception e) {
+//            System.err.println("Erro de rede ao perguntar o modo de jogo ao host. Usando modo padrão (1).");
+//            return 1; // Se der erro de rede, assume a versão original para não quebrar
+//        }
+//    }
     @Override
     public int pedirVersaoJogo() {
         // TODO Auto-generated method stub
