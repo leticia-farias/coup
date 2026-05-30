@@ -1,6 +1,9 @@
 package coup.model;
 
-public abstract class Personagem {
+import java.io.Serializable;
+
+public abstract class Personagem implements Serializable {
+    private static final long serialVersionUID = 1L;
 	
 	PersonagensNomes nome;
 	

@@ -1,5 +1,6 @@
 package cliente;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -7,7 +8,8 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import coup.view.TelaJogo;
 
-public class Cliente extends UnicastRemoteObject implements IClient {
+public class Cliente extends UnicastRemoteObject implements IClient, Serializable {
+	private static final long serialVersionUID = 1L;
 
     private transient TelaJogo tela;
     private String meuNome;

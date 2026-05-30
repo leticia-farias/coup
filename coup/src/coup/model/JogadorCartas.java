@@ -1,9 +1,11 @@
 package coup.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JogadorCartas {
+public class JogadorCartas implements Serializable {
+    private static final long serialVersionUID = 1L;
 
 	List<Carta> cartas = new ArrayList<>();
 	boolean statusCompleto = true;
