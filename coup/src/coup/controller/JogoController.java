@@ -117,10 +117,8 @@ private void processarTurno(Jogador jogadorAtual) {
             this.contexto.setJogadorAutor(jogadorAtual);
         }
         
-        // 2. Atualiza as cartas na tela antes de pedir a jogada
-        if (view instanceof servidor.JogoViewRemota) {
-            ((servidor.JogoViewRemota) view).enviarCartasParaJogador(jogadorAtual);
-        }
+     // 2. Atualiza as cartas na tela antes de pedir a jogada
+        view.atualizarCartas(jogadorAtual);
         
         // 3. Determina a ação respeitando a regra de 10 moedas obrigatórias
         int respostaAcao;

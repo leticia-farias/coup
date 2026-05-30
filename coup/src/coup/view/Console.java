@@ -416,4 +416,14 @@ public class Console implements IJogoView {
 	    System.out.println("1 - SIM  |  2 - NÃO");
 	    return lerInteiro() == 1;
 	}
+	
+	@Override
+	public void mostrarLogPrivado(Jogador jogador, String mensagem) {
+		System.out.println("[PRIVADO para " + jogador.getNome() + "]: " + mensagem);
+	}
+
+	@Override
+	public void atualizarCartas(Jogador jogador) {
+		mostrarCartas(jogador);
+	}
 }

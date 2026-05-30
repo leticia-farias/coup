@@ -46,4 +46,7 @@ public interface IJogoView {
 	public int pedirHabilidadeInquisidor(Jogador jogador);
 	public Carta pedirCartaParaMostrar(Jogador jogador);
 	public boolean decidirTrocaInquisidor(Jogador inquisidor, Carta cartaMostrada);
+	
+	void mostrarLogPrivado(Jogador jogador, String mensagem);
+	void atualizarCartas(Jogador jogador);
 }

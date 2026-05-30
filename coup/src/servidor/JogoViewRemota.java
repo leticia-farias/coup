@@ -192,7 +192,8 @@ public class JogoViewRemota implements IJogoView {
         return null;
     }
     
-    public void enviarCartasParaJogador(Jogador jogador) {
+    @Override
+    public void atualizarCartas(Jogador jogador) {
         try {
             IClient client = clientes.get(jogador.getNome());
             List<String> nomesCartas = new ArrayList<>();
@@ -203,7 +204,17 @@ public class JogoViewRemota implements IJogoView {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-    } 
+    }
+    
+    @Override
+    public void mostrarLogPrivado(Jogador jogador, String mensagem) {
+        try {
+            IClient client = clientes.get(jogador.getNome());
+            if (client != null) {
+                client.receberLog("[SECRETO] " + mensagem);
+            }
+        } catch (RemoteException ignored) {}
+    }
 
     @Override
     public int pedirHabilidadeInquisidor(Jogador jogador) {
@@ -381,7 +392,7 @@ public class JogoViewRemota implements IJogoView {
     // Metodo que permite ao servidor varrer todos os jogadores e forçar o envio das cartas para cada um deles
     public void sincronizarCartasIniciais(List<Jogador> todosJogadores) {
         for (Jogador j : todosJogadores) {
-            enviarCartasParaJogador(j);
+            atualizarCartas(j);
         }
     }
 }
