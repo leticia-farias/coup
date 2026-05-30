@@ -59,17 +59,9 @@ public class Baralho {
 	}
 	
 	public List<Carta> embaralharCartas(List<Carta> baralho) {
-		Collections.shuffle(baralho);
-		
-		/* verificao */
-		System.out.println("---------------------");
-		System.out.println("Total de cartas: " + baralho.size());
-		System.out.println("Cartas:");
-		for (Carta c : baralho) {
-			System.out.println(c.personagem.getNome());				
-		}
-		return baralho;
-	}
+        Collections.shuffle(baralho);
+        return baralho;
+    }
 	
 	public void distribuirCartas(List<Jogador> jogadoresList, List<Carta> baralhoCartas) {
 		for (int i = 0; i < 2; i++) {
